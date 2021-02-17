@@ -38,11 +38,13 @@ import { defineComponent } from '@nuxtjs/composition-api'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
+import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 
 export default defineComponent({
   name: 'BaseCardVue',
   components: {
     BaseParagraph,
+    BaseHeader,
     BaseLink,
   },
   props: {
@@ -72,11 +74,6 @@ div.article-tile {
   border: 1px solid var(--secondary_bg_hover);
 }
 
-div.tags > p {
-  padding: 12px;
-  background-color: var(--secondary_bg);
-}
-
 div.article-tile > div.content {
   padding: 0 58px;
   width: calc(100% - 116px);
@@ -101,15 +98,6 @@ div.article-tile > div.header > a {
 
 div.article-tile > div.header > a:hover {
   color: var(--primary_text_hover);
-}
-
-div.article-tile > div.content > div.tags > p {
-  margin-top: 12px;
-  margin-right: 12px;
-}
-
-div.article-tile > div.content > p.description {
-  padding-bottom: 36px;
 }
 
 @media only screen and (max-width: 1024px) {
