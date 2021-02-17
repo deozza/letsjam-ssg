@@ -46,49 +46,43 @@ export default defineComponent({
   },
   setup() {
     const { store } = useContext()
-    const menuLinksAnonymous: Array<BaseLinkModele> = [
-      {
-        link: '/login',
-        title: 'Se connecter',
-        customClasses: [],
-        internalLink: true,
-        icon: '',
-        customLink: false,
-      },
-      {
-        link: '/signin',
-        title: 'Créer un compte',
-        customClasses: [],
-        internalLink: true,
-        icon: '',
-        customLink: false,
-      },
-    ]
+
+    const loginLink: BaseLinkModele = new BaseLinkModele(
+      ['login'],
+      'Se connecter',
+      true
+    )
+    const signinLink: BaseLinkModele = new BaseLinkModele(
+      ['signin'],
+      'Créer un compte',
+      true
+    )
+
+    const menuLinksAnonymous: Array<BaseLinkModele> = [loginLink, signinLink]
+
+    const postLink: BaseLinkModele = new BaseLinkModele(
+      ['post'],
+      'Ecrire un article',
+      true,
+      'fas fa-edit'
+    )
+    const profileLink: BaseLinkModele = new BaseLinkModele(
+      ['profile'],
+      'Mon compte',
+      true,
+      'fa fa-user'
+    )
+    const logoutLink: BaseLinkModele = new BaseLinkModele(
+      ['logout'],
+      'Déconection',
+      true,
+      'fas fa-power-off'
+    )
+
     const menuLinksLoggedIn: Array<BaseLinkModele> = [
-      {
-        link: '/post',
-        title: 'Ecrire un article',
-        customClasses: [],
-        internalLink: true,
-        icon: 'fas fa-edit',
-        customLink: false,
-      },
-      {
-        link: '/profile',
-        title: 'Mon compte',
-        customClasses: [],
-        internalLink: true,
-        icon: 'fa fa-user',
-        customLink: false,
-      },
-      {
-        link: '/logout',
-        title: 'Déconnection',
-        customClasses: [],
-        internalLink: true,
-        icon: 'fas fa-power-off',
-        customLink: false,
-      },
+      postLink,
+      profileLink,
+      logoutLink,
     ]
     const isLoggedIn = computed(() => store.getters['user/isLoggedIn'])
 

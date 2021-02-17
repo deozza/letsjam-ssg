@@ -77,14 +77,7 @@ export default defineComponent({
 
     const alert: BaseAlertModele = new BaseAlertModele('', '')
 
-    const authorLink: BaseLinkModele = {
-      title: articleAuthor.displayName,
-      link: '/users/' + encodeURI(articleAuthor.displayName),
-      internalLink: true,
-      customLink: true,
-      customClasses: [],
-      icon: '',
-    }
+    const authorLink: BaseLinkModele = new BaseLinkModele(['users', articleAuthor.displayName], articleAuthor.displayName, true)
 
     const postLoading: boolean = false
 

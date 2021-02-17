@@ -3,6 +3,7 @@ import Article from '~/entities/Api/Article/Article'
 import articleQuery from '~/apollo/queries/Article/article.gql'
 import articlesQuery from '~/apollo/queries/Article/articles.gql'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
+import ArticlePage from '~/entities/Front/Article/Display/ArticlePage'
 
 export type State = {
   list: Array<Article>
@@ -35,7 +36,7 @@ export const actions: ActionTree<RootState, RootState> = {
   async SHOW({ commit }, { params }) {
     const apolloClient = this.app.apolloProvider.defaultClient
 
-    let article = {}
+    let article: any = {}
 
     try {
       article = await apolloClient.query({
@@ -49,7 +50,7 @@ export const actions: ActionTree<RootState, RootState> = {
       console.log(e)
     }
 
-    commit('SET', article)
+    commit('SET', article.data.article)
   },
 }
 
@@ -63,7 +64,7 @@ export const mutations: MutationTree<RootState> = {
 }
 
 export const getters: GetterTree<RootState, RootState> = {
-  publicArticlesAsCards(state): Array<object> {
+  publicArticlesAsCards(state): Array<ArticleCardInfo> {
     const articles: Array<object> = state.list.filter(
       (article) => article.currentVersion !== null
     )
