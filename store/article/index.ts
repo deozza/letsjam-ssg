@@ -3,7 +3,6 @@ import Article from '~/entities/Api/Article/Article'
 import articleQuery from '~/apollo/queries/Article/article.gql'
 import articlesQuery from '~/apollo/queries/Article/articles.gql'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
-import ArticlePage from '~/entities/Front/Article/Display/ArticlePage'
 
 export type State = {
   list: Array<Article>
@@ -38,19 +37,20 @@ export const actions: ActionTree<RootState, RootState> = {
 
     let article: any = {}
 
-    try {
-      article = await apolloClient.query({
+    await apolloClient
+      .query({
         query: articleQuery,
         variables: {
           displayName: decodeURI(params.username),
           title: decodeURI(params.title),
         },
       })
-    } catch (e) {
-      console.log(e)
-    }
+      .then((articleFromGQL: any) => {
+        article = articleFromGQL.data.article
+      })
+      .catch((e: any) => console.log(e))
 
-    commit('SET', article.data.article)
+    commit('SET', article)
   },
 }
 
