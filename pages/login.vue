@@ -88,7 +88,7 @@ export default defineComponent({
           this.email,
           this.password
         )
-        await this.$router.push('/')
+        await this.$router.push('/profile')
       } catch (firebaseError) {
         this.alert.message =
           'Impossible de se connecter. Les identifiants sont invalides'

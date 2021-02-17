@@ -1,0 +1,10 @@
+query articleQuery($displayName: String!, $title: String!){
+  article(displayName: $displayName, title: $title){
+    title,
+    currentVersion{contentPath},
+    dateOfLastUpdate,
+    user{displayName},
+    totalLikes,
+    totalViews
+  }
+}

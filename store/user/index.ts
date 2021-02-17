@@ -34,6 +34,9 @@ export const actions: ActionTree<RootState, RootState> = {
   },
 
   onAuthStateChangedAction({ commit }, { authUser }) {
+    if (authUser === null) {
+      authUser = {}
+    }
     commit('SET_AUTH_USER', { authUser })
   },
 }

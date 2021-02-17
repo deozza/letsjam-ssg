@@ -1,4 +1,5 @@
 export default class User {
+  uid: string
   displayName: string
   email: string
   dateOfCreation: number
@@ -6,6 +7,8 @@ export default class User {
   active: boolean
 
   constructor(user: object) {
+    // @ts-ignore
+    this.uid = 'uid' in user ? user.uid : ''
     // @ts-ignore
     this.displayName = 'displayName' in user ? user.displayName : ''
     // @ts-ignore

@@ -1,0 +1,9 @@
+query articles{
+  articles{
+    title,
+    dateOfLastUpdate,
+    user{displayName},
+    totalViews,
+    totalLikes
+  }
+}

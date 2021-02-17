@@ -17,14 +17,23 @@ const config: NuxtConfig = {
           'Bienvenue sur Letsjam, le premier blog communautaire des musiciens',
       },
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    link: [
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      {
+        rel: 'stylesheet',
+        integrity:
+          'sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/',
+        crossorigin: 'anonymous',
+        href: 'https://use.fontawesome.com/releases/v5.6.3/css/all.css',
+      },
+    ],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/css/style.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: ['~/plugins/provide-apollo-client.ts'],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -45,6 +54,7 @@ const config: NuxtConfig = {
     '@nuxtjs/pwa',
     '@nuxtjs/firebase',
     '@nuxtjs/markdownit',
+    '@nuxtjs/apollo',
   ],
   firebase: {
     config: {
@@ -71,9 +81,19 @@ const config: NuxtConfig = {
       storage: true,
     },
   },
+  apollo: {
+    clientConfigs: {
+      default: {
+        httpEndpoint:
+          'https://us-central1-letsjam-294614.cloudfunctions.net/graphql',
+      },
+    },
+  },
   markdownit: {
+    preset: 'default',
     runtime: true,
     html: true,
+    breaks: false,
   },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
@@ -84,7 +104,9 @@ const config: NuxtConfig = {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    transpile: ['@vue/apollo-composable'],
+  },
 }
 
 export default config
