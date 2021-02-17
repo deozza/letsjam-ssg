@@ -2,6 +2,7 @@ import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import Article from '~/entities/Api/Article/Article'
 import articleQuery from '~/apollo/queries/Article/article.gql'
 import articlesQuery from '~/apollo/queries/Article/articles.gql'
+import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
 
 export type State = {
   list: Array<Article>
@@ -39,7 +40,10 @@ export const actions: ActionTree<RootState, RootState> = {
     try {
       article = await apolloClient.query({
         query: articleQuery,
-        variables: { displayName: params.username, title: params.title },
+        variables: {
+          displayName: decodeURI(params.username),
+          title: decodeURI(params.title),
+        },
       })
     } catch (e) {
       console.log(e)
@@ -59,10 +63,17 @@ export const mutations: MutationTree<RootState> = {
 }
 
 export const getters: GetterTree<RootState, RootState> = {
-  publicArticlesAsCards(state): Array<Article> {
-    const articles: Array<Article> = state.list.filter(
-      (article) => article.title !== null
+  publicArticlesAsCards(state): Array<object> {
+    const articles: Array<object> = state.list.filter(
+      (article) => article.currentVersion !== null
     )
-    return articles
+
+    const articleCardInfoArray: Array<ArticleCardInfo> = []
+
+    articles.forEach((article) => {
+      articleCardInfoArray.push(new ArticleCardInfo(article))
+    })
+
+    return articleCardInfoArray
   },
 }

@@ -5,45 +5,28 @@
     class="article-tile flex-column flex-left"
   >
     <div class="header">
-      <BaseLink itemprop="author" :link="card.author">{{
-        card.author.title
+      <BaseLink itemprop="author" :link="article.authorLink">{{
+        article.authorDisplayName
       }}</BaseLink>
-      <BaseParagraph itemprop="datePublished">{{ card.date }}</BaseParagraph>
+      <BaseParagraph itemprop="datePublished">{{
+        getDateFromTimestamp(article.dateOfLastUpdate)
+      }}</BaseParagraph>
     </div>
     <div class="content">
-      <BaseLink :link="card.title">
+      <BaseLink :link="article.articleLink">
         <BaseHeader itemprop="name" html-type="h3">{{
-          card.title.title
+          article.title
         }}</BaseHeader>
       </BaseLink>
-      <BaseParagraph :class="'description'">{{
-        card.description
-      }}</BaseParagraph>
-
-      <div class="flex-row">
-        <BaseVideo
-          v-if="card.video !== undefined && card.video !== null"
-          :alt="card.video.alt"
-          :src="card.video.src"
-          :iframe="card.video.iframe"
-        />
-        <BaseImage
-          v-if="card.image !== undefined && card.image !== null"
-          :alt="card.image.alt"
-          :src="card.image.src"
-          thumbnail
-          action="redirectToArticle"
-          @redirectToArticle="redirectToArticle"
-        />
-      </div>
-
-      <div class="tags flex-row flex-left">
-        <BaseParagraph
-          v-for="(tag, index) in card.tags"
-          :key="index"
-          itemprop="articleSection"
-          >{{ tag }}</BaseParagraph
-        >
+    </div>
+    <div class="header">
+      <div class="flex-row flex-left">
+        <BaseParagraph class="p-footer"
+          >{{ article.totalViews }} <i class="far fa-eye"></i
+        ></BaseParagraph>
+        <BaseParagraph class="p-footer"
+          >{{ article.totalLikes }} <i class="far fa-heart"></i
+        ></BaseParagraph>
       </div>
     </div>
   </div>
@@ -52,29 +35,29 @@
 <script lang="ts">
 import { defineComponent } from '@nuxtjs/composition-api'
 
-import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
-import BaseCardModele from '~/components/Molecules/Card/BaseCardModele'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
-import BaseVideo from '~/components/Atoms/Media/Video/BaseVideo.vue'
+import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
 
 export default defineComponent({
   name: 'BaseCardVue',
   components: {
-    BaseHeader,
     BaseParagraph,
     BaseLink,
-    BaseVideo,
   },
   props: {
-    card: {
-      type: Object as () => BaseCardModele,
+    article: {
+      type: Object as () => ArticleCardInfo,
       required: true,
     },
   },
   methods: {
     redirectToArticle() {
       window.location.href = this.card.title.link
+    },
+    getDateFromTimestamp(timestamp: string) {
+      const timestampAsNumber: number = +timestamp
+      return new Date(timestampAsNumber).toLocaleString()
     },
   },
 })

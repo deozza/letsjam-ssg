@@ -1,5 +1,4 @@
-import Article from '~/entities/Api/Article/Article'
-import User from '~/entities/Api/User/User'
+import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 
 export default class ArticleCardInfo {
   title: string
@@ -7,20 +6,35 @@ export default class ArticleCardInfo {
   authorDisplayName: string
   totalViews: number
   totalLikes: number
-  tags: Array<string>
+  articleLink: BaseLinkModele
+  authorLink: BaseLinkModele
 
-  constructor(article: Article, user: User) {
-    this.title = article.title
+  constructor(articleFromGraphql: object) {
+    // @ts-ignore
+    this.title = articleFromGraphql.title
 
-    this.dateOfLastUpdate = article.dateOfLastUpdate
+    // @ts-ignore
+    this.dateOfLastUpdate = articleFromGraphql.dateOfLastUpdate
 
-    this.authorDisplayName = user.displayName
+    // @ts-ignore
+    this.authorDisplayName = articleFromGraphql.user.displayName
 
-    this.totalViews = article.totalViews
+    // @ts-ignore
+    this.totalViews = articleFromGraphql.totalViews
 
-    this.totalLikes = article.totalLikes
+    // @ts-ignore
+    this.totalLikes = articleFromGraphql.totalLikes
 
-    this.tags = article.tags
+    this.articleLink = new BaseLinkModele(
+      ['user', this.authorDisplayName, 'article', this.title],
+      this.title,
+      true
+    )
+    this.authorLink = new BaseLinkModele(
+      ['user', this.authorDisplayName],
+      this.title,
+      true
+    )
   }
 
   toJSON(): any {

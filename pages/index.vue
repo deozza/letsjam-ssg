@@ -3,39 +3,11 @@
     <BaseHeader html-type="h2">Les articles</BaseHeader>
     <div v-if="$fetchState.pending">loading</div>
     <div v-else>
-      <div v-for="(article, index) in articles" :key="index">
-        <div
-          itemscope
-          itemtype="http://schema.org/Article"
-          class="article-tile flex-column flex-left"
-        >
-          <div class="header">
-            <a href="">
-              {{ article.user.displayName }}
-            </a>
-            <BaseParagraph itemprop="datePublished">{{
-              getDateFromTimestamp(article.dateOfLastUpdate)
-            }}</BaseParagraph>
-          </div>
-          <div class="content">
-            <a href="">
-              <BaseHeader itemprop="name" html-type="h3">{{
-                article.title
-              }}</BaseHeader>
-            </a>
-          </div>
-          <div class="header">
-            <div class="flex-row flex-left">
-              <BaseParagraph class="p-footer"
-                >{{ article.totalViews }} <i class="far fa-eye"></i
-              ></BaseParagraph>
-              <BaseParagraph class="p-footer"
-                >{{ article.totalLikes }} <i class="far fa-heart"></i
-              ></BaseParagraph>
-            </div>
-          </div>
-        </div>
-      </div>
+      <BaseCard
+        v-for="(article, index) in articles"
+        :key="index"
+        :article="article"
+      />
     </div>
   </section>
 </template>
@@ -43,31 +15,24 @@
 <script lang="ts">
 import { defineComponent, useContext, useFetch } from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
-import articles from '~/apollo/queries/Article/articles.gql'
-import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
+import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
+import BaseCard from '~/components/Molecules/Card/BaseCard.vue'
 
 export default defineComponent({
   name: 'IndexPage',
   components: {
     BaseHeader,
-    BaseParagraph,
+    BaseCard,
   },
   setup() {
     const context = useContext()
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { fetch, fetchState } = useFetch(
-      async () => await context.store.dispatch('article/GET')
-    )
-    const articles = context.store.state.article.list
+    useFetch(async () => await context.store.dispatch('article/GET'))
+    const articles: Array<ArticleCardInfo> =
+      context.store.getters['article/publicArticlesAsCards']
 
     return { articles }
-  },
-  methods: {
-    getDateFromTimestamp(timestamp: string) {
-      const timestampAsNumber: number = +timestamp
-      return new Date(timestampAsNumber).toLocaleString()
-    },
   },
 })
 </script>
