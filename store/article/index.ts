@@ -1,6 +1,7 @@
 import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import Article from '~/entities/Api/Article/Article'
 import articleQuery from '~/apollo/queries/Article/article.gql'
+import articlesQuery from '~/apollo/queries/Article/articles.gql'
 
 export type State = {
   list: Array<Article>
@@ -16,24 +17,19 @@ export type RootState = ReturnType<typeof state>
 
 export const actions: ActionTree<RootState, RootState> = {
   async GET({ commit }) {
-    const articles: Array<Article> = []
+    const apolloClient = this.app.apolloProvider.defaultClient
 
-    const articlesQuery = this.$fire.firestore
-      .collection('articles')
-      .orderBy('dateOfLastUpdate', 'desc')
+    let articles = []
+
     try {
-      const snap = await articlesQuery.get()
-      if (!snap.empty) {
-        snap.forEach((doc) => {
-          const article = new Article(doc.data())
-          articles.push(article)
-        })
-      }
-    } catch (error) {
-      console.log(error)
+      articles = await apolloClient.query({
+        query: articlesQuery,
+      })
+    } catch (e) {
+      console.log(e)
     }
 
-    commit('SET_LIST', articles)
+    commit('SET_LIST', articles.data.articles)
   },
   async SHOW({ commit }, { params }) {
     const apolloClient = this.app.apolloProvider.defaultClient

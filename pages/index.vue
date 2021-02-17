@@ -1,7 +1,7 @@
 <template>
   <section>
     <BaseHeader html-type="h2">Les articles</BaseHeader>
-    <div v-if="$apollo.loading">loading</div>
+    <div v-if="$fetchState.pending">loading</div>
     <div v-else>
       <div v-for="(article, index) in articles" :key="index">
         <div
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@nuxtjs/composition-api'
+import { defineComponent, useContext, useFetch } from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import articles from '~/apollo/queries/Article/articles.gql'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
@@ -52,15 +52,16 @@ export default defineComponent({
     BaseHeader,
     BaseParagraph,
   },
-  apollo: {
-    articles: {
-      query: articles,
-    },
-  },
-  data() {
-    return {
-      articles: [],
-    }
+  setup() {
+    const context = useContext()
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { fetch, fetchState } = useFetch(
+      async () => await context.store.dispatch('article/GET')
+    )
+    const articles = context.store.state.article.list
+
+    return { articles }
   },
   methods: {
     getDateFromTimestamp(timestamp: string) {

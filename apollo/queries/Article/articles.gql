@@ -1,4 +1,4 @@
-query articles{
+query articlesQuery{
   articles{
     title,
     dateOfLastUpdate,
