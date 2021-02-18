@@ -77,7 +77,11 @@ export default defineComponent({
 
     const alert: BaseAlertModele = new BaseAlertModele('', '')
 
-    const authorLink: BaseLinkModele = new BaseLinkModele(['users', articleAuthor.displayName], articleAuthor.displayName, true)
+    const authorLink: BaseLinkModele = new BaseLinkModele(
+      ['users', articleAuthor.displayName],
+      articleAuthor.displayName,
+      true
+    )
 
     const postLoading: boolean = false
 
@@ -96,57 +100,37 @@ export default defineComponent({
       const user = this.$store.state.user.authUser
 
       const article: Article = new Article({
-        authorId: user.id,
+        authorId: user.uid,
         title: this.articleTitle,
         tags: this.articleTags,
       })
 
       const articleVersion: ArticleVersion = new ArticleVersion({})
 
-      const articleVersionPath: string =
-        encodeURI(user.displayName) +
-        '/' +
-        encodeURI(article.title) +
-        '/' +
-        'v' +
-        articleVersion.versionNumber +
-        '.md'
+      article.versions = [articleVersion.uid]
+      articleVersion.content = this.articleContent
+      articleVersion.articleUid = article.uid
 
-      article.versions = [btoa(articleVersionPath)]
-      articleVersion.filePaths = { FR_fr: articleVersionPath }
-
-      const storageRef = this.$fire.storage.ref().child(articleVersionPath)
       const articleVersionRef = this.$fire.firestore
         .collection('articleVersion')
-        .doc(btoa(articleVersionPath))
-      const articleRef = this.$fire.firestore.collection('articles')
+        .doc(articleVersion.uid)
+      const articleRef = this.$fire.firestore
+        .collection('articles')
+        .doc(article.uid)
 
-      await articleRef.add(article.toJSON())
-
-      try {
-        await storageRef.putString(this.articleContent)
-        try {
-          await articleVersionRef.set(articleVersion.toJSON())
-          try {
-            await articleRef.add(article.toJSON())
-            // await this.$store.dispatch('articles/GET_ACCORDING_TO_USER', user)
-            await this.$router.push({
-              path: '/profile',
-              query: { success: 'true' },
-            })
-            this.postLoading = false
-          } catch (e) {
-            this.alert.message = e.message
-            this.postLoading = false
-          }
-        } catch (e) {
-          this.alert.message = e.message
+      await articleRef
+        .set(article.toJSON())
+        .then(() => {
+          articleVersionRef.set(articleVersion.toJSON())
+        })
+        .then(() => {
           this.postLoading = false
-        }
-      } catch (e) {
-        this.alert.message = e.message
-        this.postLoading = false
-      }
+          this.$router.push({
+            path: '/profile',
+            query: { success: 'true' },
+          })
+        })
+        .catch(() => (this.postLoading = false))
     },
   },
 })

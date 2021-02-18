@@ -66,7 +66,8 @@ export const mutations: MutationTree<RootState> = {
 export const getters: GetterTree<RootState, RootState> = {
   publicArticlesAsCards(state): Array<ArticleCardInfo> {
     const articles: Array<object> = state.list.filter(
-      (article) => article.currentVersion !== null
+      (article) =>
+        article.currentVersion !== null && article.currentVersion !== ''
     )
 
     const articleCardInfoArray: Array<ArticleCardInfo> = []

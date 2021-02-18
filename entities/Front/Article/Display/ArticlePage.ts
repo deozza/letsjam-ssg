@@ -1,5 +1,4 @@
-import Article from '~/entities/Api/Article/Article'
-import User from '~/entities/Api/User/User'
+import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 
 export default class ArticlePage {
   title: string
@@ -9,21 +8,36 @@ export default class ArticlePage {
   totalLikes: number
   tags: Array<string>
   content: string
+  authorLink: BaseLinkModele
 
-  constructor(article: Article, user: User, content: string) {
+  constructor(article: object) {
+    // @ts-ignore
     this.title = article.title
 
+    // @ts-ignore
     this.dateOfLastUpdate = article.dateOfLastUpdate
 
-    this.authorDisplayName = user.displayName
+    // @ts-ignore
+    this.authorDisplayName = article.user.displayName
 
+    // @ts-ignore
     this.totalViews = article.totalViews
 
+    // @ts-ignore
     this.totalLikes = article.totalLikes
 
+    // @ts-ignore
     this.tags = article.tags
 
-    this.content = content
+    // @ts-ignore
+    this.content = article.currentVersion.content
+
+    // @ts-ignore
+    this.authorLink = new BaseLinkModele(
+      ['user', this.authorDisplayName],
+      this.title,
+      true
+    )
   }
 
   toJSON(): any {
