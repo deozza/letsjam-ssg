@@ -5,12 +5,15 @@
       v-else
       itemscope
       itemtype="http://schema.org/Article"
-      class="article-tile border"
+      class="article-viewer border"
     >
       <BaseHeader itemprop="name" html-type="h2">{{
         article.title
       }}</BaseHeader>
-      <div class="header">
+      <div class="article-header">
+        <BaseLink itemprop="author" :link="article.authorLink">{{
+          article.authorDisplayName
+        }}</BaseLink>
         <BaseParagraph itemprop="datePublished"
           >Le
           {{ getDateFromTimestamp(article.dateOfLastUpdate) }}</BaseParagraph
@@ -18,14 +21,11 @@
       </div>
       <div
         itemprop="articleBody"
-        class="content"
-        v-html="$md.render(article.currentVersion.content)"
+        class="article-content"
+        v-html="$md.render(article.content)"
       />
-      <div class="header">
+      <div class="article-header">
         <div class="flex-row flex-left">
-          <BaseParagraph class="p-footer"
-            >{{ article.totalViews }} <i class="far fa-eye"></i
-          ></BaseParagraph>
           <BaseParagraph class="p-footer"
             >{{ article.totalLikes }} <i class="far fa-heart"></i
           ></BaseParagraph>
@@ -40,6 +40,7 @@ import { defineComponent, useContext, useFetch } from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
+import ArticlePage from '~/entities/Front/Article/Display/ArticlePage'
 
 export default defineComponent({
   name: 'ArticleViewPage',
@@ -55,7 +56,7 @@ export default defineComponent({
     useFetch(async () => {
       await context.store.dispatch('article/SHOW', { params })
     })
-    const article = context.store.state.article.article
+    const article = new ArticlePage(context.store.state.article.article)
 
     return { article }
   },
@@ -69,53 +70,53 @@ export default defineComponent({
 </script>
 
 <style>
-div.article-tile {
+div.article-viewer {
   background-color: white;
   padding: 12px 24px;
   margin-bottom: 24px;
   border-radius: 3px;
 }
 
-div.article-tile.border {
+div.article-viewer.border {
   border: 1px solid var(--secondary_bg_hover);
 }
 
-div.article-tile > div.header > a {
+div.article-viewer > div.article-header > a {
   text-decoration: none;
   color: black;
 }
 
-div.header div p.p-footer {
+div.article-header div p.p-footer {
   padding-right: 12px;
 }
 
-div.content {
+div.article-content {
   padding-top: 24px;
 }
 
-div.content > h2 {
+div.article-content > h2 {
   padding-bottom: 12px;
   font-size: 1.75rem;
 }
 
-div.content > p {
+div.article-content > p {
   padding-bottom: 24px;
 }
 
-div.content > p > em {
+div.article-content > p > em {
   font-style: italic;
 }
 
-div.content > p > strong {
+div.article-content > p > strong {
   font-weight: bold;
 }
 
-div.content > ul,
-div.content > ol {
+div.article-content > ul,
+div.article-content > ol {
   padding-bottom: 24px;
 }
 
-div.content > ul > li {
+div.article-content > ul > li {
   list-style: inside;
 }
 </style>

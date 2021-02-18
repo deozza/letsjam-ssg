@@ -2,9 +2,9 @@
   <div
     itemscope
     itemtype="http://schema.org/Article"
-    class="article-tile flex-column flex-left"
+    class="article-card flex-column flex-left"
   >
-    <div class="header">
+    <div class="card-header">
       <BaseLink itemprop="author" :link="article.authorLink">{{
         article.authorDisplayName
       }}</BaseLink>
@@ -12,14 +12,14 @@
         getDateFromTimestamp(article.dateOfLastUpdate)
       }}</BaseParagraph>
     </div>
-    <div class="content">
+    <div class="card-content">
       <BaseLink :link="article.articleLink">
         <BaseHeader itemprop="name" html-type="h3">{{
           article.title
         }}</BaseHeader>
       </BaseLink>
     </div>
-    <div class="header">
+    <div class="card-header">
       <div class="flex-row flex-left">
         <BaseParagraph class="p-footer"
           >{{ article.totalLikes }} <i class="far fa-heart"></i
@@ -63,7 +63,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-div.article-tile {
+div.article-card {
   background-color: white;
   padding: 12px 0;
   margin-bottom: 24px;
@@ -71,39 +71,39 @@ div.article-tile {
   border: 1px solid var(--secondary_bg_hover);
 }
 
-div.article-tile > div.content {
+div.article-card > div.card-content {
   padding: 0 58px;
   width: calc(100% - 116px);
 }
 
-div.article-tile > div.header {
+div.article-card > div.card-header {
   padding-left: 24px;
 }
 
-div.article-tile > div.content > a {
+div.article-card > div.card-content > a {
   text-decoration: none;
 }
 
-div.article-tile > div.content > a :hover {
+div.article-card > div.card-content > a :hover {
   color: var(--primary_text_hover) !important;
 }
 
-div.article-tile > div.header > a {
+div.article-card > div.card-header > a {
   text-decoration: none;
   color: black;
 }
 
-div.article-tile > div.header > a:hover {
+div.article-card > div.card-header > a:hover {
   color: var(--primary_text_hover);
 }
 
 @media only screen and (max-width: 1024px) {
-  div.article-tile > div.content {
+  div.article-card > div.card-content {
     padding: 0 6px;
     width: calc(100% - 12px);
   }
 
-  div.article-tile > div.header {
+  div.article-card > div.card-header {
     padding-left: 6px;
   }
 }
