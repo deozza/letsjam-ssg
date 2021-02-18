@@ -56,7 +56,9 @@ export default defineComponent({
     useFetch(async () => {
       await context.store.dispatch('article/SHOW', { params })
     })
-    const article = new ArticlePage(context.store.state.article.article)
+    const article: ArticlePage = new ArticlePage(
+      context.store.state.article.article
+    )
 
     return { article }
   },

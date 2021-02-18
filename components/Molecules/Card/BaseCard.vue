@@ -52,7 +52,7 @@ export default defineComponent({
   },
   methods: {
     redirectToArticle() {
-      window.location.href = this.article.articleLink.link
+      this.$router.push(this.article.articleLink.link)
     },
     getDateFromTimestamp(timestamp: string) {
       const timestampAsNumber: number = +timestamp
