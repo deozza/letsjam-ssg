@@ -1,3 +1,5 @@
+import { uuid } from 'vue-uuid'
+
 export enum ArticleVersionState {
   DRAFT = 'DRAFT',
   PRE_PUBLISHED = 'PRE_PUBLISHED',
@@ -7,16 +9,20 @@ export enum ArticleVersionState {
 }
 
 export default class ArticleVersion {
+  uid: string
   articleUid: string
   dateOfCreation: number
   dateOfLastUpdate: number
   versionNumber: number
-  filePaths: object
+  content: string
   views: number
   likes: number
   state: ArticleVersionState
 
   constructor(articleVersion: object) {
+    // @ts-ignore
+    this.uid = 'uid' in articleVersion ? articleVersion.uid : uuid.v4()
+
     // @ts-ignore
     this.articleUid = 'articleUid' in articleVersion ? articleVersion.articleUid : ''
 
@@ -30,7 +36,7 @@ export default class ArticleVersion {
     this.versionNumber = 'versionNumber' in articleVersion ? articleVersion.versionNumber : 0
 
     // @ts-ignore
-    this.filePaths = 'filePaths' in articleVersion ? articleVersion.filePaths : {}
+    this.content = 'content' in articleVersion ? articleVersion.content : ''
 
     // @ts-ignore
     this.state = 'state' in articleVersion ? articleVersion.state : ArticleVersionState.DRAFT

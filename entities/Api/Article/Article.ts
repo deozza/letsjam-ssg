@@ -1,4 +1,7 @@
+import { uuid } from 'vue-uuid'
+
 export default class Article {
+  uid: string
   title: string
   dateOfCreation: number
   dateOfLastUpdate: number
@@ -10,6 +13,9 @@ export default class Article {
   tags: Array<string>
 
   constructor(article: object) {
+    // @ts-ignore
+    this.uid = 'uid' in article ? article.uid : uuid.v4()
+
     // @ts-ignore
     this.title = 'title' in article ? article.title : ''
 
@@ -35,8 +41,9 @@ export default class Article {
     this.totalLikes = 'totalLikes' in article ? article.totalLikes : 0
 
     // @ts-ignore
-    this.tags = 'tags' in article ? article.tags : {}
+    this.tags = 'tags' in article ? article.tags : []
   }
+
 
   toJSON(): any {
     return Object.setPrototypeOf(this, Object.prototype)
