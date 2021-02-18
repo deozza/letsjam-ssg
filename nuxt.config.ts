@@ -85,7 +85,7 @@ const config: NuxtConfig = {
     clientConfigs: {
       default: {
         httpEndpoint:
-          'https://us-central1-letsjam-294614.cloudfunctions.net/graphql',
+          'https://us-central1-letsjam-294614.cloudfunctions.net/graphql-graphql',
       },
     },
   },
