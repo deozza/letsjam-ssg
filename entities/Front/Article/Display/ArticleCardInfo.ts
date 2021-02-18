@@ -4,7 +4,6 @@ export default class ArticleCardInfo {
   title: string
   dateOfLastUpdate: number
   authorDisplayName: string
-  totalViews: number
   totalLikes: number
   articleLink: BaseLinkModele
   authorLink: BaseLinkModele
@@ -18,9 +17,6 @@ export default class ArticleCardInfo {
 
     // @ts-ignore
     this.authorDisplayName = articleFromGraphql.user.displayName
-
-    // @ts-ignore
-    this.totalViews = articleFromGraphql.totalViews
 
     // @ts-ignore
     this.totalLikes = articleFromGraphql.totalLikes

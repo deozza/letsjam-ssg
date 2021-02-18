@@ -22,9 +22,6 @@
     <div class="header">
       <div class="flex-row flex-left">
         <BaseParagraph class="p-footer"
-          >{{ article.totalViews }} <i class="far fa-eye"></i
-        ></BaseParagraph>
-        <BaseParagraph class="p-footer"
           >{{ article.totalLikes }} <i class="far fa-heart"></i
         ></BaseParagraph>
       </div>

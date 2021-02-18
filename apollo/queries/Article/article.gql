@@ -4,7 +4,6 @@ query articleQuery($displayName: String!, $title: String!){
     currentVersion{content},
     dateOfLastUpdate,
     user{displayName},
-    totalLikes,
-    totalViews
+    totalLikes
   }
 }

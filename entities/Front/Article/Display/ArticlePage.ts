@@ -4,7 +4,6 @@ export default class ArticlePage {
   title: string
   dateOfLastUpdate: number
   authorDisplayName: string
-  totalViews: number
   totalLikes: number
   tags: Array<string>
   content: string
@@ -19,9 +18,6 @@ export default class ArticlePage {
 
     // @ts-ignore
     this.authorDisplayName = article.user.displayName
-
-    // @ts-ignore
-    this.totalViews = article.totalViews
 
     // @ts-ignore
     this.totalLikes = article.totalLikes

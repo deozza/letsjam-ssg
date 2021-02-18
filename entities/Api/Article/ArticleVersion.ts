@@ -15,7 +15,6 @@ export default class ArticleVersion {
   dateOfLastUpdate: number
   versionNumber: number
   content: string
-  views: number
   likes: number
   state: ArticleVersionState
 
@@ -40,9 +39,6 @@ export default class ArticleVersion {
 
     // @ts-ignore
     this.state = 'state' in articleVersion ? articleVersion.state : ArticleVersionState.DRAFT
-
-    // @ts-ignore
-    this.views = 'views' in articleVersion ? articleVersion.views : 0
 
     // @ts-ignore
     this.likes = 'likes' in articleVersion ? articleVersion.likes : 0

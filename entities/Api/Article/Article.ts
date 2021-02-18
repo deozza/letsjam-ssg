@@ -8,7 +8,6 @@ export default class Article {
   authorUid: string
   versions: Array<string>
   currentVersion: string
-  totalViews: number
   totalLikes: number
   tags: Array<string>
 
@@ -33,9 +32,6 @@ export default class Article {
 
     // @ts-ignore
     this.currentVersion = 'currentVersion' in article ? article.currentVersion : ''
-
-    // @ts-ignore
-    this.totalViews = 'totalViews' in article ? article.totalViews : 0
 
     // @ts-ignore
     this.totalLikes = 'totalLikes' in article ? article.totalLikes : 0
