@@ -13,10 +13,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, useContext, useFetch } from '@nuxtjs/composition-api'
+import {
+  defineComponent,
+  useContext,
+  useFetch,
+  ref,
+} from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
 import BaseCard from '~/components/Molecules/Card/BaseCard.vue'
+import articlesQuery from '~/apollo/queries/Article/articles.gql'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -26,11 +32,25 @@ export default defineComponent({
   },
   setup() {
     const context = useContext()
+    const articles = ref([])
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    useFetch(async () => await context.store.dispatch('article/GET'))
-    const articles: Array<ArticleCardInfo> =
-      context.store.getters['article/publicArticlesAsCards']
+    useFetch(async () => {
+      await context.app.apolloProvider.defaultClient
+        .query({
+          query: articlesQuery,
+          prefetch: true,
+        })
+        .then((articlesFromGQL: any) => {
+          const publicArticles = articlesFromGQL.data.articles.filter(
+            (article) =>
+              article.currentVersion !== null && article.currentVersion !== ''
+          )
+          publicArticles.forEach((publicArticle) => {
+            articles.value.push(new ArticleCardInfo(publicArticle))
+          })
+        })
+        .catch((e) => console.log(e))
+    })
 
     return { articles }
   },

@@ -36,11 +36,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, useContext, useFetch } from '@nuxtjs/composition-api'
+import {
+  defineComponent,
+  useContext,
+  useFetch,
+  ref,
+} from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import ArticlePage from '~/entities/Front/Article/Display/ArticlePage'
+import articleQuery from '~/apollo/queries/Article/article.gql'
 
 export default defineComponent({
   name: 'ArticleViewPage',
@@ -52,13 +58,23 @@ export default defineComponent({
   setup() {
     const context = useContext()
     const params = context.params.value
+    const article = ref({})
 
     useFetch(async () => {
-      await context.store.dispatch('article/SHOW', { params })
+      await context.app.apolloProvider.defaultClient
+        .query({
+          query: articleQuery,
+          prefetch: true,
+          variables: {
+            displayName: decodeURI(params.username),
+            title: decodeURI(params.title),
+          },
+        })
+        .then((articleFromGQL: any) => {
+          article.value = new ArticlePage(articleFromGQL.data.article)
+        })
+        .catch((e: any) => console.log(e))
     })
-    const article: ArticlePage = new ArticlePage(
-      context.store.state.article.article
-    )
 
     return { article }
   },
