@@ -17,12 +17,12 @@ import {
   defineComponent,
   useContext,
   useFetch,
-  ref,
 } from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
 import BaseCard from '~/components/Molecules/Card/BaseCard.vue'
 import articlesQuery from '~/apollo/queries/Article/articles.gql'
+import ArticlesGql from '~/entities/Api/Article/ArticlesGql'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -32,7 +32,7 @@ export default defineComponent({
   },
   setup() {
     const context = useContext()
-    const articles = ref([])
+    const articles: Array<ArticleCardInfo> =[]
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -41,15 +41,13 @@ export default defineComponent({
           prefetch: true,
         })
         .then((articlesFromGQL: any) => {
-          const publicArticles = articlesFromGQL.data.articles.filter(
-            (article) =>
-              article.currentVersion !== null && article.currentVersion !== ''
-          )
-          publicArticles.forEach((publicArticle) => {
-            articles.value.push(new ArticleCardInfo(publicArticle))
+          const publicArticles: Array<ArticlesGql> = articlesFromGQL.data.articles
+          publicArticles.forEach((publicArticle: ArticlesGql) => {
+            const articleCardInfo: ArticleCardInfo = new ArticleCardInfo(publicArticle)
+            articles.push(articleCardInfo)
           })
         })
-        .catch((e) => console.log(e))
+        .catch((e: any) => console.log(e))
     })
 
     return { articles }

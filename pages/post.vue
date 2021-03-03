@@ -53,13 +53,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, useContext } from '@nuxtjs/composition-api'
+import { defineComponent, ref, useContext } from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 import BaseAlertModele from '~/components/Atoms/Alert/BaseAlertModele'
 import User from '~/entities/Api/User/User'
 import ArticleVersion from '~/entities/Api/Article/ArticleVersion'
-import Article from '~/entities/Api/Article/Article'
+import ArticlePost from '~/entities/Api/Article/ArticlePost'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 
 export default defineComponent({
@@ -68,7 +68,7 @@ export default defineComponent({
     BaseHeader,
     BaseButton,
   },
-  setup() {
+  setup({ maxWidth }) {
     const context = useContext()
     const articleAuthor: User = context.store.state.user.authUser
     const articleContent: string = ''
@@ -85,6 +85,8 @@ export default defineComponent({
 
     const postLoading: boolean = false
 
+    const cssVars = ref({ '--max-width': maxWidth })
+
     return {
       articleContent,
       articleTags,
@@ -92,6 +94,7 @@ export default defineComponent({
       authorLink,
       alert,
       postLoading,
+      cssVars,
     }
   },
   methods: {
@@ -99,8 +102,8 @@ export default defineComponent({
       this.postLoading = true
       const user = this.$store.state.user.authUser
 
-      const article: Article = new Article({
-        authorId: user.uid,
+      const article: ArticlePost = new ArticlePost({
+        authorUid: user.uid,
         title: this.articleTitle,
         tags: this.articleTags,
       })
@@ -251,6 +254,12 @@ section#preview div.content > h2 {
 
 section#preview div.content > p {
   padding-bottom: 24px;
+}
+
+section#preview div.content img {
+  max-width: var(--max-width);
+  width: 100%;
+  height: auto;
 }
 
 section#preview div.content > p > em {

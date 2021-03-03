@@ -1,14 +1,10 @@
 import { uuid } from 'vue-uuid'
 
-export default class Article {
+export default class ArticlePost {
   uid: string
   title: string
-  dateOfCreation: number
-  dateOfLastUpdate: number
   authorUid: string
   versions: Array<string>
-  currentVersion: string
-  totalLikes: number
   tags: Array<string>
 
   constructor(article: object) {
