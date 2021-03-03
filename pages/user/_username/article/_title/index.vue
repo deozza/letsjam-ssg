@@ -47,6 +47,7 @@ import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import ArticlePage from '~/entities/Front/Article/Display/ArticlePage'
 import articleQuery from '~/apollo/queries/Article/article.gql'
+import ArticleGql from '~/entities/Api/Article/ArticleGql'
 
 export default defineComponent({
   name: 'ArticleViewPage',
@@ -71,7 +72,8 @@ export default defineComponent({
           },
         })
         .then((articleFromGQL: any) => {
-          article.value = new ArticlePage(articleFromGQL.data.article)
+          const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
+          article.value = new ArticlePage(articleGql)
         })
         .catch((e: any) => console.log(e))
     })

@@ -1,4 +1,5 @@
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
+import ArticleGql from '~/entities/Api/Article/ArticleGql'
 
 export default class ArticlePage {
   title: string
@@ -9,7 +10,7 @@ export default class ArticlePage {
   content: string
   authorLink: BaseLinkModele
 
-  constructor(article: object) {
+  constructor(article: ArticleGql) {
     // @ts-ignore
     this.title = article.title
 
