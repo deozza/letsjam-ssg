@@ -62,7 +62,7 @@ div.article-tile {
   border-radius: 3px;
 }
 
-div.article-tile.border {
+div.article-tile .border {
   border: 1px solid var(--secondary_bg_hover);
 }
 

@@ -1,6 +1,8 @@
 <template>
   <section>
-    <div v-if="$fetchState.pending">loading...</div>
+    <div v-if="$fetchState.pending">
+      <BaseArticleLoading></BaseArticleLoading>
+    </div>
     <div
       v-else
       itemscope
@@ -48,6 +50,7 @@ import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph
 import ArticlePage from '~/entities/Front/Article/Display/ArticlePage'
 import articleQuery from '~/apollo/queries/Article/article.gql'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
+import BaseArticleLoading from '~/components/Molecules/Article/BaseArticleLoading.vue'
 
 export default defineComponent({
   name: 'ArticleViewPage',
@@ -55,6 +58,7 @@ export default defineComponent({
     BaseHeader,
     BaseLink,
     BaseParagraph,
+    BaseArticleLoading
   },
   setup() {
     const context = useContext()
