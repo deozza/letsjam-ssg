@@ -6,8 +6,11 @@ import {
   gql,
 } from "apollo-server-express";
 import express from "express";
+// eslint-disable-next-line no-unused-vars
 import {Article} from "./utils/interfaces/Article";
+// eslint-disable-next-line no-unused-vars
 import {User} from "./utils/interfaces/User";
+// eslint-disable-next-line no-unused-vars
 import {ArticleVersion} from "./utils/interfaces/ArticleVersion";
 const fbApp = require("../initializeApp");
 

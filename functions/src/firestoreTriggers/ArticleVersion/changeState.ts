@@ -6,7 +6,7 @@ const db = fbApp.admin.firestore();
 
 exports.changeState = functions.firestore
     .document("articleVersion/{articleVersionUid}")
-    .onUpdate((change: any, context: any) => {
+    .onUpdate((change: any) => {
       const newValue = change.after.data();
       const oldValue = change.before.data();
       if (newValue.state === "PUBLISHED" && newValue !== oldValue) {

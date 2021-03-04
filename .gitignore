@@ -88,4 +88,4 @@ sw.*
 
 # Vim swap files
 *.swp
-/service-account.json
+/functions/service-account.json
