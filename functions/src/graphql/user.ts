@@ -50,8 +50,6 @@ const typeDefs = gql`
 const resolvers = {
   User: {
     async articles(user: any) {
-      console.log(user)
-      console.log(user.uid)
       try {
         const userArticles = await fbApp.admin
             .firestore()
@@ -68,7 +66,6 @@ const resolvers = {
   Articles: {
     async user(article: any) {
       try {
-        console.log(article)
         const articleAuthor = await fbApp.admin
             .firestore()
             .doc(`users/${article.authorUid}`)
