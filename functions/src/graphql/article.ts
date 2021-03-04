@@ -6,87 +6,47 @@ import {
   gql,
 } from "apollo-server-express";
 import express from "express";
+import { Article } from "./utils/interfaces/Article";
+import { User } from "./utils/interfaces/User";
+import { ArticleVersion } from "./utils/interfaces/ArticleVersion";
 const fbApp = require("../initializeApp");
 
-interface User {
-    displayName: string;
-}
-
-interface ArticleVersion {
-    uid: string;
-    articleUid: string;
-    content: string;
-    dateOfCreation: number;
-    dateOfLastUpdate: number;
-    likes: number;
-    state: string;
-    versionNumber: number;
-}
-
-interface Article {
-    uid: string;
-    title: string;
-    authorUid: string;
-    dateOfCreation: number;
-    dateOfLastUpdate: number;
-    totalLikes: number;
-    versions: Array<string>;
-    currentVersion: string;
-    tags: Array<string>;
-}
 
 const typeDefs = gql`
-    type User {
-        displayName: String!
-        articles: [Articles]!
-    }
+  type User {
+    displayName: String!
+  }
 
-    type Articles {
-        uid: String!
-        title: String!
-        dateOfCreation: String!
-        dateOfLastUpdate: String!
-        totalLikes: Int!
-        versions: [ArticleVersions]!
-        currentVersion: ArticleVersions
-        tags: [String]!
-        user: User!
-    }
+  type Articles {
+    uid: String!
+    title: String!
+    dateOfCreation: String!
+    dateOfLastUpdate: String!
+    totalLikes: Int!
+    versions: [ArticleVersions]!
+    currentVersion: ArticleVersions
+    tags: [String]!
+    user: User!
+  }
 
-    type ArticleVersions {
-        uid: String!
-        content: String
-        dateOfCreation: String
-        dateOfLastUpdate: String
-        likes: Int
-        state: String
-        versionNumber: Int
-        article: Articles
-    }
+  type ArticleVersions {
+    uid: String!
+    content: String
+    dateOfCreation: String
+    dateOfLastUpdate: String
+    likes: Int
+    state: String
+    versionNumber: Int
+    article: Articles
+  }
 
-    type Query {
-        articles: [Articles]
-        user(displayName: String!): User
-        article(displayName: String!, title: String!): Articles
-    }
+  type Query {
+    articles: [Articles]
+    article(displayName: String!, title: String!): Articles
+  }
 `;
 
 const resolvers = {
-  User: {
-    async articles(user: any) {
-      try {
-        const userArticles = await fbApp.admin
-            .firestore()
-            .collection("articles")
-            .where("user.displayName", "==", user.displayName)
-            .get();
-
-        return userArticles.docs.map((article: any) => article.data()) as Article[];
-      } catch (e) {
-        throw new ApolloError(e);
-      }
-    },
-  },
   Articles: {
     async user(article: any) {
       try {
@@ -158,21 +118,6 @@ const resolvers = {
         throw new ApolloError(e);
       }
     },
-    async user(_: null, args:{displayName: string}) {
-      try {
-        const userQuery = await fbApp.admin
-            .firestore()
-            .collection("users")
-            .where("displayName", "==", args.displayName)
-            .get();
-
-        const user = userQuery.docs[0].data() as User | undefined;
-
-        return user || new ValidationError("User ID not found.");
-      } catch (e) {
-        throw new ApolloError(e);
-      }
-    },
     async article(_: null, args:{displayName: string, title: string}) {
       try {
         const userQuery = await fbApp.admin
@@ -182,11 +127,8 @@ const resolvers = {
             .get();
 
         if (userQuery.docs.length === 0) {
-          return new ValidationError("Article not found.");
+          return new ValidationError("Author not found.");
         }
-
-        console.log(userQuery.docs[0].id);
-
         try {
           const articleQuery = await fbApp.admin
               .firestore()
@@ -209,6 +151,7 @@ const resolvers = {
     },
   },
 };
+
 
 const app = express();
 const server = new ApolloServer({typeDefs, resolvers, introspection: true});
