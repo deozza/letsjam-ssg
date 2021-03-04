@@ -1,9 +1,9 @@
 import * as functions from "firebase-functions";
 import {
-    ApolloServer,
-    ApolloError,
-    ValidationError,
-    gql,
+  ApolloServer,
+  ApolloError,
+  ValidationError,
+  gql,
 } from "apollo-server-express";
 import express from "express";
 const fbApp = require("../initializeApp");
@@ -72,143 +72,142 @@ const typeDefs = gql`
 `;
 
 const resolvers = {
-    User: {
-        async articles(user: any) {
-            try {
-                const userArticles = await fbApp.admin
-                    .firestore()
-                    .collection("articles")
-                    .where("user.displayName", "==", user.displayName)
-                    .get();
+  User: {
+    async articles(user: any) {
+      try {
+        const userArticles = await fbApp.admin
+            .firestore()
+            .collection("articles")
+            .where("user.displayName", "==", user.displayName)
+            .get();
 
-                return userArticles.docs.map((article: any) => article.data()) as Article[];
-            } catch (e) {
-                throw new ApolloError(e);
-            }
-        },
+        return userArticles.docs.map((article: any) => article.data()) as Article[];
+      } catch (e) {
+        throw new ApolloError(e);
+      }
     },
-    Articles: {
-        async user(article: any) {
-            try {
-                const articleAuthor = await fbApp.admin
-                    .firestore()
-                    .doc(`users/${article.authorUid}`)
-                    .get();
+  },
+  Articles: {
+    async user(article: any) {
+      try {
+        const articleAuthor = await fbApp.admin
+            .firestore()
+            .doc(`users/${article.authorUid}`)
+            .get();
 
-                return articleAuthor.data() as User;
-            } catch (e) {
-                throw new ApolloError(e);
-            }
-        },
-        async versions(article: any){
-            try {
-                const articleVersion = await fbApp.admin
-                    .firestore()
-                    .collection("articleVersion")
-                    .where("articleUid", "==", article.uid)
-                    .get();
+        return articleAuthor.data() as User;
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async versions(article: any) {
+      try {
+        const articleVersion = await fbApp.admin
+            .firestore()
+            .collection("articleVersion")
+            .where("articleUid", "==", article.uid)
+            .get();
 
-                return articleVersion.docs.map((version: any) => version.data()) as ArticleVersion[];
-            } catch (e) {
-                throw new ApolloError(e);
-            }
-        },
-        async currentVersion(article: any){
-            if(article.currentVersion !== ""){
-                try {
-                    const currentVersion = await fbApp.admin
-                        .firestore()
-                        .doc(`articleVersion/${article.currentVersion}`)
-                        .get();
+        return articleVersion.docs.map((version: any) => version.data()) as ArticleVersion[];
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async currentVersion(article: any) {
+      if (article.currentVersion !== "") {
+        try {
+          const currentVersion = await fbApp.admin
+              .firestore()
+              .doc(`articleVersion/${article.currentVersion}`)
+              .get();
 
-                    return currentVersion.data() as ArticleVersion;
-                } catch (e) {
-                    throw new ApolloError(e);
-                }
-            }
-
-            return {} as ArticleVersion
+          return currentVersion.data() as ArticleVersion;
+        } catch (e) {
+          throw new ApolloError(e);
         }
+      }
+
+      return {} as ArticleVersion;
     },
-    ArticleVersions: {
-        async article(articleVersion: any){
-            try {
-                const article = await fbApp.admin
-                    .firestore()
-                    .doc(`articles/${articleVersion.articleUid}`)
-                    .get();
+  },
+  ArticleVersions: {
+    async article(articleVersion: any) {
+      try {
+        const article = await fbApp.admin
+            .firestore()
+            .doc(`articles/${articleVersion.articleUid}`)
+            .get();
 
-                return article.data() as Article;
-            } catch (e) {
-                throw new ApolloError(e);
-            }
-        },
+        return article.data() as Article;
+      } catch (e) {
+        throw new ApolloError(e);
+      }
     },
-    Query: {
-        async articles() {
-            try {
-                const articles = await fbApp.admin
-                    .firestore()
-                    .collection("articles")
-                    .orderBy("dateOfLastUpdate", "DESC")
-                    .get();
+  },
+  Query: {
+    async articles() {
+      try {
+        const articles = await fbApp.admin
+            .firestore()
+            .collection("articles")
+            .orderBy("dateOfLastUpdate", "DESC")
+            .get();
 
-                return articles.docs.map((article: any) => article.data()) as Article[];
-            } catch (e) {
-                throw new ApolloError(e);
-            }
-        },
-        async user(_: null, args:{displayName: string}) {
-            try {
-                const userQuery = await fbApp.admin
-                    .firestore()
-                    .collection("users")
-                    .where("displayName", "==", args.displayName)
-                    .get();
+        return articles.docs.map((article: any) => article.data()) as Article[];
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async user(_: null, args:{displayName: string}) {
+      try {
+        const userQuery = await fbApp.admin
+            .firestore()
+            .collection("users")
+            .where("displayName", "==", args.displayName)
+            .get();
 
-                const user = userQuery.docs[0].data() as User | undefined;
+        const user = userQuery.docs[0].data() as User | undefined;
 
-                return user || new ValidationError("User ID not found.");
-            } catch (e) {
-                throw new ApolloError(e);
-            }
-        },
-        async article(_: null, args:{displayName: string, title: string}){
-            try {
+        return user || new ValidationError("User ID not found.");
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async article(_: null, args:{displayName: string, title: string}) {
+      try {
+        const userQuery = await fbApp.admin
+            .firestore()
+            .collection("users")
+            .where("displayName", "==", args.displayName)
+            .get();
 
-                const userQuery = await fbApp.admin
-                    .firestore()
-                    .collection('users')
-                    .where('displayName', '==', args.displayName)
-                    .get()
-
-                if(userQuery.docs.length === 0) {
-                    return new ValidationError("Article not found.");
-                }
-
-                console.log(userQuery.docs[0].id)
-
-                try{
-                    const articleQuery = await fbApp.admin
-                        .firestore()
-                        .collection("articles")
-                        .where("authorUid", "==", userQuery.docs[0].id)
-                        .where("title", "==", args.title)
-                        .get();
-
-                    if(articleQuery.docs.length <= 0){
-                        return new ValidationError("Article not found.");
-                    }
-
-                    return articleQuery.docs[0].data() as Article;
-                }catch (e){
-                    throw new ApolloError(e);
-                }
-            } catch (e) {
-                throw new ApolloError(e);
-            }
+        if (userQuery.docs.length === 0) {
+          return new ValidationError("Article not found.");
         }
+
+        console.log(userQuery.docs[0].id);
+
+        try {
+          const articleQuery = await fbApp.admin
+              .firestore()
+              .collection("articles")
+              .where("authorUid", "==", userQuery.docs[0].id)
+              .where("title", "==", args.title)
+              .get();
+
+          if (articleQuery.docs.length <= 0) {
+            return new ValidationError("Article not found.");
+          }
+
+          return articleQuery.docs[0].data() as Article;
+        } catch (e) {
+          throw new ApolloError(e);
+        }
+      } catch (e) {
+        throw new ApolloError(e);
+      }
     },
+  },
 };
 
 const app = express();
