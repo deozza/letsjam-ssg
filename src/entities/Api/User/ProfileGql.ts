@@ -11,14 +11,17 @@ export default class ProfileGql {
 
     // @ts-ignore
     this.email = 'displayName' in profileFromGraphql ? profileFromGraphql.email : ''
-
-
+    
     this.articles = []
 
     // @ts-ignore
-    for(let article of profileFromGraphql.articles){
-      this.articles.push(new ArticleGql(article))
+    if(profileFromGraphql.articles !== undefined){
+      // @ts-ignore
+      for(let article of profileFromGraphql.articles){
+        this.articles.push(new ArticleGql(article))
+      }
     }
+
 
   }
 }
