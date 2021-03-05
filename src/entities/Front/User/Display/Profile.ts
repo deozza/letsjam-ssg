@@ -1,12 +1,12 @@
-import User from '~/entities/Api/User/User'
+import ProfileGql from '~/entities/Api/User/ProfileGql'
 
 export default class Profile {
   displayName: string
   email: string
 
-  constructor(user: User) {
-    this.displayName = user.displayName
-    this.email = user.email
+  constructor(profile: ProfileGql) {
+    this.displayName = profile.displayName
+    this.email = profile.email
   }
 
   toJSON(): any {

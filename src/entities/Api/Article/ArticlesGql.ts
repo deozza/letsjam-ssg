@@ -1,6 +1,7 @@
 export default class ArticlesGql {
   title: string
   dateOfLastUpdate: number
+  dateOfCreation: number
   user: string
   totalLikes: number
 
@@ -10,6 +11,9 @@ export default class ArticlesGql {
 
     // @ts-ignore
     this.dateOfLastUpdate = articleFromGraphql.dateOfLastUpdate
+
+    // @ts-ignore
+    this.dateOfCreation = articleFromGraphql.dateOfCreation
 
     // @ts-ignore
     this.user = articleFromGraphql.user
