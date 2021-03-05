@@ -5,7 +5,7 @@
       <section class="profile-info">
         <BaseHeader html-type="h3">{{profile.displayName}}</BaseHeader>
         <BaseParagraph visual-type="light">Email : {{profile.email}}</BaseParagraph>
-        <BaseButton visual-type="primary" @buttonClicked="redirectToEditProfile()">Editer</BaseButton>
+        <!--<BaseButton visual-type="primary" @buttonClicked="redirectToEditProfile()">Editer</BaseButton>-->
       </section>
       <section class="articles-posted">
         <BaseHeader html-type="h3">Mes articles</BaseHeader>
