@@ -31,6 +31,7 @@ import articlesQuery from '~/apollo/queries/Article/articles.gql'
 import ArticlesGql from '~/entities/Api/Article/ArticlesGql'
 import BaseCardLoading from '~/components/Molecules/Card/BaseCardLoading.vue'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
+import { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -52,8 +53,13 @@ export default defineComponent({
         .then((articlesFromGQL: any) => {
           const publicArticles: Array<ArticleGql> = articlesFromGQL.data.articles
           publicArticles.forEach((publicArticle: ArticleGql) => {
-            const articleCardInfo: ArticleCardInfo = new ArticleCardInfo(publicArticle)
-            articles.push(articleCardInfo)
+
+            console.log(publicArticle)
+
+            if(publicArticle.currentVersion.state === ArticleVersionState.PUBLISHED){
+              const articleCardInfo: ArticleCardInfo = new ArticleCardInfo(publicArticle)
+              articles.push(articleCardInfo)
+            }
           })
         })
         .catch((e: any) => console.log(e))

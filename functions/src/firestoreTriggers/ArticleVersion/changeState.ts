@@ -1,8 +1,4 @@
-const functions = require("firebase-functions");
-const FieldValue = require("firebase-admin").FieldValue;
-const fbApp = require("../../initializeApp");
-
-const db = fbApp.admin.firestore();
+import {functions, FieldValue, db} from "../initializeTriggers";
 
 exports.changeState = functions.firestore
     .document("articleVersion/{articleVersionUid}")

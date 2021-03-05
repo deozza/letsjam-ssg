@@ -3,7 +3,7 @@ import { uuid } from 'vue-uuid'
 export enum ArticleVersionState {
   DRAFT = 'DRAFT',
   PRE_PUBLISHED = 'PRE_PUBLISHED',
-  PUBLISHED = 'PRE_PUBLISHED',
+  PUBLISHED = 'PUBLISHED',
   MODERATED = 'MODERATED',
   ARCHIVED = 'ARCHIVED',
 }
@@ -13,7 +13,7 @@ export default class ArticleVersion {
   articleUid: string
   dateOfCreation: number
   dateOfLastUpdate: number
-  versionNumber: number
+  versionNumber: number | null
   content: string
   likes: number
   state: ArticleVersionState
@@ -32,7 +32,7 @@ export default class ArticleVersion {
     this.dateOfLastUpdate = 'dateOfLastUpdate' in articleVersion ? articleVersion.dateOfLastUpdate : Date.now()
 
     // @ts-ignore
-    this.versionNumber = 'versionNumber' in articleVersion ? articleVersion.versionNumber : 0
+    this.versionNumber = 'versionNumber' in articleVersion ? articleVersion.versionNumber : null
 
     // @ts-ignore
     this.content = 'content' in articleVersion ? articleVersion.content : ''

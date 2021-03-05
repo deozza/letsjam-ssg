@@ -6,7 +6,10 @@ query profileQuery($displayName: String!){
       title,
       totalLikes,
       dateOfCreation,
-      dateOfLastUpdate
+      dateOfLastUpdate,
+      currentVersion{
+        state
+      }
     }
   }
 }

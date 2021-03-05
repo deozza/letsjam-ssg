@@ -3,6 +3,7 @@ query articlesQuery{
     title,
     dateOfLastUpdate,
     user{displayName},
-    totalLikes
+    totalLikes,
+    currentVersion{state}
   }
 }

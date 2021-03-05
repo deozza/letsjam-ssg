@@ -44,10 +44,17 @@
     </div>
     <BaseButton
       html-type="button"
+      visual-type="success"
+      :loading="postLoading"
+      @buttonClicked="post(false)"
+      >Poster</BaseButton
+    >
+    <BaseButton
+      html-type="button"
       visual-type="primary"
       :loading="postLoading"
-      @buttonClicked="post()"
-      >Poster</BaseButton
+      @buttonClicked="post(true)"
+    >Sauvegarder le brouillon</BaseButton
     >
   </section>
 </template>
@@ -58,7 +65,7 @@ import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 import BaseAlertModele from '~/components/Atoms/Alert/BaseAlertModele'
 import User from '~/entities/Api/User/User'
-import ArticleVersion from '~/entities/Api/Article/ArticleVersion'
+import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import ArticlePost from '~/entities/Api/Article/ArticlePost'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 
@@ -98,7 +105,7 @@ export default defineComponent({
     }
   },
   methods: {
-    async post() {
+    async post(isDraft: boolean) {
       this.postLoading = true
       const user = this.$store.state.user.authUser
 
@@ -111,8 +118,13 @@ export default defineComponent({
       const articleVersion: ArticleVersion = new ArticleVersion({})
 
       article.versions = [articleVersion.uid]
+      article.currentVersion = articleVersion.uid
       articleVersion.content = this.articleContent
       articleVersion.articleUid = article.uid
+
+      if(!isDraft){
+        articleVersion.state = ArticleVersionState.PRE_PUBLISHED
+      }
 
       const articleVersionRef = this.$fire.firestore
         .collection('articleVersion')
