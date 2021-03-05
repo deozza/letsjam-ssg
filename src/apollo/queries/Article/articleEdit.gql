@@ -1,0 +1,23 @@
+query articleEditQuery($displayName: String!, $title: String!){
+  article(displayName: $displayName, title: $title){
+    uid,
+    title,
+    versions{
+      versionNumber,
+      dateOfCreation,
+      dateOfLastUpdate
+      content,
+      likes,
+      state,
+      uid
+    },
+    currentVersion{
+      versionNumber,
+      uid,
+      state
+    }
+    dateOfCreation,
+    dateOfLastUpdate,
+    totalLikes
+  }
+}

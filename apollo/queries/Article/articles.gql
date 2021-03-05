@@ -1,8 +1,0 @@
-query articlesQuery{
-  articles{
-    title,
-    dateOfLastUpdate,
-    user{displayName},
-    totalLikes
-  }
-}

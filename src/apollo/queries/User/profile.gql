@@ -1,0 +1,15 @@
+query profileQuery($displayName: String!){
+  profile(displayName: $displayName){
+    displayName,
+    email,
+    articles{
+      title,
+      totalLikes,
+      dateOfCreation,
+      dateOfLastUpdate,
+      currentVersion{
+        state
+      }
+    }
+  }
+}
