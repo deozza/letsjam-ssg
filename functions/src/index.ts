@@ -1,3 +1,2 @@
-exports.user = require("./graphql/user");
-exports.article = require("./graphql/article");
+exports.graphql = require("./graphql/graphql");
 exports.articleVersion = require("./firestoreTriggers/ArticleVersion/changeState");
