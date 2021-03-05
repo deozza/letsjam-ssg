@@ -23,8 +23,8 @@ import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import profileQuery from '~/apollo/queries/User/profile.gql'
 import ProfileGql from '~/entities/Api/User/ProfileGql'
 import Profile from '~/entities/Front/User/Display/Profile'
-import ArticlesGql from '~/entities/Api/Article/ArticlesGql'
 import ArticleCardInfoProfilePage from '~/entities/Front/Article/Display/ArticleCardInfoProfilePage'
+import ArticleGql from '~/entities/Api/Article/ArticleGql'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -51,12 +51,11 @@ export default defineComponent({
           const profileGql: ProfileGql = new ProfileGql(profileFromGQL.data.profile)
           profile.value = new Profile(profileGql)
 
-          const publicArticles: Array<ArticlesGql> = profileFromGQL.data.profile.articles
+          const publicArticles: Array<ArticleGql> = []
 
+          profileFromGQL.data.profile.articles.forEach((article: object) => publicArticles.push(new ArticleGql(article)))
 
           publicArticles.forEach((publicArticle: ArticlesGql) => {
-            console.log(publicArticle)
-
             const articleCardInfo: ArticleCardInfoProfilePage = new ArticleCardInfoProfilePage(publicArticle)
             articles.push(articleCardInfo)
           })

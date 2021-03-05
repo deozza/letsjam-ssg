@@ -1,5 +1,5 @@
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
-import ArticlesGql from '~/entities/Api/Article/ArticlesGql'
+import ArticleGql from '~/entities/Api/Article/ArticleGql'
 
 export default class ArticleCardInfo {
   title: string
@@ -9,18 +9,18 @@ export default class ArticleCardInfo {
   articleLink: BaseLinkModele
   authorLink: BaseLinkModele
 
-  constructor(articlesGql: ArticlesGql) {
+  constructor(articleGql: ArticleGql) {
     // @ts-ignore
-    this.title = articlesGql.title
+    this.title = articleGql.title
 
     // @ts-ignore
-    this.dateOfLastUpdate = articlesGql.dateOfLastUpdate
+    this.dateOfLastUpdate = articleGql.dateOfLastUpdate
 
     // @ts-ignore
-    this.authorDisplayName = articlesGql.user.displayName
+    this.authorDisplayName = articleGql.user.displayName
 
     // @ts-ignore
-    this.totalLikes = articlesGql.totalLikes
+    this.totalLikes = articleGql.totalLikes
 
     this.articleLink = new BaseLinkModele(
       ['user', this.authorDisplayName, 'article', this.title],

@@ -30,6 +30,7 @@ import BaseCard from '~/components/Molecules/Card/BaseCard.vue'
 import articlesQuery from '~/apollo/queries/Article/articles.gql'
 import ArticlesGql from '~/entities/Api/Article/ArticlesGql'
 import BaseCardLoading from '~/components/Molecules/Card/BaseCardLoading.vue'
+import ArticleGql from '~/entities/Api/Article/ArticleGql'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -49,8 +50,8 @@ export default defineComponent({
           prefetch: true,
         })
         .then((articlesFromGQL: any) => {
-          const publicArticles: Array<ArticlesGql> = articlesFromGQL.data.articles
-          publicArticles.forEach((publicArticle: ArticlesGql) => {
+          const publicArticles: Array<ArticleGql> = articlesFromGQL.data.articles
+          publicArticles.forEach((publicArticle: ArticleGql) => {
             const articleCardInfo: ArticleCardInfo = new ArticleCardInfo(publicArticle)
             articles.push(articleCardInfo)
           })
