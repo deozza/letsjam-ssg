@@ -95,7 +95,7 @@ export default defineComponent({
 
           profileFromGQL.data.profile.articles.forEach((article: object) => publicArticles.push(new ArticleGql(article)))
 
-          publicArticles.forEach((publicArticle: ArticlesGql) => {
+          publicArticles.forEach((publicArticle: ArticleGql) => {
             const articleCardInfo: ArticleCardInfoProfilePage = new ArticleCardInfoProfilePage(publicArticle)
             articles.push(articleCardInfo)
           })
