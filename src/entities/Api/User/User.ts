@@ -6,7 +6,7 @@ export default class User {
   dateOfLastUpdate: number
   active: boolean
 
-  constructor(user: object) {
+  constructor(user: object | null) {
     // @ts-ignore
     this.uid = 'uid' in user ? user.uid : ''
     // @ts-ignore

@@ -64,6 +64,7 @@ import Profile from '~/entities/Front/User/Display/Profile'
 import ArticleCardInfoProfilePage from '~/entities/Front/Article/Display/ArticleCardInfoProfilePage'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
+import User from '~/entities/Api/User/User'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -75,8 +76,10 @@ export default defineComponent({
   },
   setup() {
     const context = useContext()
-    const profile = ref({})
-    const articles: Array<ArticleCardInfoProfilePage> = []
+    const profile = ref<Profile>({} as Profile)
+    const articles = ref<ArticleCardInfoProfilePage[]>([])
+    const user: User = new User(context.$fire.auth.currentUser)
+    const userDisplayName: string = user.displayName
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -84,7 +87,7 @@ export default defineComponent({
           query: profileQuery,
           prefetch: true,
           variables: {
-            displayName: decodeURI("deozza"),
+            displayName: decodeURI(userDisplayName),
           },
         })
         .then((profileFromGQL: any) => {
@@ -92,12 +95,11 @@ export default defineComponent({
           profile.value = new Profile(profileGql)
 
           const publicArticles: Array<ArticleGql> = []
-
           profileFromGQL.data.profile.articles.forEach((article: object) => publicArticles.push(new ArticleGql(article)))
 
           publicArticles.forEach((publicArticle: ArticleGql) => {
             const articleCardInfo: ArticleCardInfoProfilePage = new ArticleCardInfoProfilePage(publicArticle)
-            articles.push(articleCardInfo)
+            articles.value.push(articleCardInfo)
           })
         })
         .catch((e: any) => console.log(e))
