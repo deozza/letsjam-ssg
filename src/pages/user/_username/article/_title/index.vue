@@ -63,7 +63,7 @@ export default defineComponent({
   setup() {
     const context = useContext()
     const params = context.params.value
-    const article = ref({})
+    const article = ref<ArticlePage>({} as ArticlePage)
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient

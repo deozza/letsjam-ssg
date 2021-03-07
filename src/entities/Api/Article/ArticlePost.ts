@@ -5,6 +5,7 @@ export default class ArticlePost {
   title: string
   authorUid: string
   versions: Array<string>
+  currentVersion: string
   tags: Array<string>
 
   constructor(article: object) {

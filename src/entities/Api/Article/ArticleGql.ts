@@ -14,8 +14,6 @@ export default class ArticleGql {
 
   constructor(articleFromGraphql: object) {
 
-    console.log(articleFromGraphql)
-
     // @ts-ignore
     this.uid = 'uid' in articleFromGraphql ? articleFromGraphql.uid : ''
 

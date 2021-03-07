@@ -1,6 +1,7 @@
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import ArticleVersionPageEdit from '~/entities/Front/Article/Display/ArticleVersionPageEdit'
+import VersionGql from '~/entities/Api/Article/VersionGql'
 
 export default class ArticlePageEdit {
   uid: string
@@ -9,6 +10,7 @@ export default class ArticlePageEdit {
   dateOfLastUpdate: string
   totalLikes: number
   tags: Array<string>
+  versions: Array<VersionGql>
   lastVersion: ArticleVersionPageEdit | null
   publishedVersion: ArticleVersionPageEdit | null
   draftVersion: ArticleVersionPageEdit | null
@@ -36,6 +38,8 @@ export default class ArticlePageEdit {
 
     // @ts-ignore
     this.tags = article.tags
+
+    this.versions = article.versions
 
     this.allVersionsAreArchived = true
 
