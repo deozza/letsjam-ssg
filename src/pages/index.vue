@@ -23,6 +23,7 @@ import {
   defineComponent,
   useContext,
   useFetch,
+  ref
 } from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
@@ -41,7 +42,7 @@ export default defineComponent({
   },
   setup() {
     const context = useContext()
-    const articles: Array<ArticleCardInfo> =[]
+    const articles  = ref<ArticleCardInfo[]>([])
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -54,7 +55,7 @@ export default defineComponent({
           publicArticles.forEach((publicArticle: ArticleGql) => {
             if(publicArticle.currentVersion.state === ArticleVersionState.PUBLISHED){
               const articleCardInfo: ArticleCardInfo = new ArticleCardInfo(publicArticle)
-              articles.push(articleCardInfo)
+              articles.value.push(articleCardInfo)
             }
           })
         })
