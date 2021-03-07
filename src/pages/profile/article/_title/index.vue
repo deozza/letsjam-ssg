@@ -1,5 +1,6 @@
 <template>
   <section v-if="$fetchState.pending">
+    <BaseArticleLoading></BaseArticleLoading>
   </section>
   <section v-else>
     <BaseHeader html-type="h2">Editer l'article</BaseHeader>
@@ -20,7 +21,6 @@
           <BaseButton v-if="!article.allVersionsAreArchived" html-type="submit" visual-type="success" @buttonClicked="updateTitle()" :loading="updateTitleLoading">Editer le titre</BaseButton>
         </div>
       </section>
-
 
       <section class="publishedVersion" v-if="article.publishedVersion !== null">
         <BaseHeader html-type="h3">Version en ligne :</BaseHeader>
@@ -116,18 +116,20 @@ import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import ArticlePageEdit from '~/entities/Front/Article/Display/ArticlePageEdit'
 import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion.ts'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
+import BaseArticleLoading from '~/components/Molecules/Article/BaseArticleLoading.vue'
 
 export default defineComponent({
   name: 'ProfilePage',
   components: {
     BaseHeader,
     BaseParagraph,
-    BaseButton
+    BaseButton,
+    BaseArticleLoading
   },
   setup() {
     const context = useContext()
     const params = context.params.value
-    let article = ref({})
+    const article = ref<ArticlePageEdit>({} as ArticlePageEdit)
     const updateTitleLoading: boolean = false
     const newArticleVersionLoading: boolean = false
     const updateLastVersionLoading: boolean = false
@@ -184,7 +186,7 @@ export default defineComponent({
       this.newArticleVersionLoading = true
 
       const articleVersion: ArticleVersion = new ArticleVersion({})
-      articleVersion.content = this.article.publishedVersion.content
+      articleVersion.content = this.article.publishedVersion!.content
       articleVersion.articleUid = this.article.uid
       articleVersion.versionNumber = this.article.versions.length
       articleVersion.state = ArticleVersionState.PRE_PUBLISHED
@@ -207,10 +209,10 @@ export default defineComponent({
 
       const articleRef = this.$fire.firestore
         .collection('articleVersion')
-        .doc(this.article.lastVersion.uid)
+        .doc(this.article.lastVersion!.uid)
 
       await articleRef
-        .update({content: this.article.lastVersion.content, state: ArticleVersionState.PRE_PUBLISHED})
+        .update({content: this.article.lastVersion!.content, state: ArticleVersionState.PRE_PUBLISHED})
         .then(() => {
           this.updateLastVersionLoading = false
         })
@@ -223,10 +225,10 @@ export default defineComponent({
 
       const articleRef = this.$fire.firestore
         .collection('articleVersion')
-        .doc(this.article.draftVersion.uid)
+        .doc(this.article.draftVersion!.uid)
 
       await articleRef
-        .update({content: this.article.draftVersion.content})
+        .update({content: this.article.draftVersion!.content})
         .then(() => {
           this.updateDraftLoading = false
         })
@@ -239,10 +241,10 @@ export default defineComponent({
 
       const articleRef = this.$fire.firestore
         .collection('articleVersion')
-        .doc(this.article.draftVersion.uid)
+        .doc(this.article.draftVersion!.uid)
 
       await articleRef
-        .update({content: this.article.draftVersion.content, state: ArticleVersionState.PRE_PUBLISHED})
+        .update({content: this.article.draftVersion!.content, state: ArticleVersionState.PRE_PUBLISHED})
         .then(() => {
           this.publishDraftLoading = false
         })
