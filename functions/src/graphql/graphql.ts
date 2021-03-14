@@ -192,4 +192,6 @@ const app = express();
 const server = new ApolloServer({typeDefs, resolvers, introspection: true});
 
 server.applyMiddleware({app, path: "/"});
-exports.graphql = functions.https.onRequest(app);
+exports.graphql = functions
+    .region("us-central1")
+    .https.onRequest(app);
