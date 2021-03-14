@@ -30,7 +30,7 @@ const config: NuxtConfig = {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['~/css/style.css'],
+  css: ['~/assets/css/style.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: ['~/plugins/provide-apollo-client.ts'],
@@ -104,8 +104,10 @@ const config: NuxtConfig = {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
+  buildDir: "../functions/.nuxt",
   build: {
     transpile: ['@vue/apollo-composable'],
+    extractCSS: true
   },
 }
 

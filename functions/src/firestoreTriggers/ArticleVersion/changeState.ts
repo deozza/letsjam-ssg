@@ -1,6 +1,8 @@
 import {functions, FieldValue, db} from "../initializeTriggers";
 
-exports.changeState = functions.firestore
+exports.changeState = functions
+    .region("us-central1")
+    .firestore
     .document("articleVersion/{articleVersionUid}")
     .onUpdate((change: any) => {
       const newValue = change.after.data();

@@ -9,7 +9,17 @@
     "generate": "nuxt-ts generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
     "lint:style": "stylelint \"**/*.{vue,css}\" --ignore-path .gitignore",
-    "lint": "npm run lint:js && npm run lint:style"
+    "lint": "npm run lint:js && npm run lint:style",
+    "clean:public": "rm -rf \"../public/**/*.*!(md)\" && rm -rf \"../public/_nuxt\"",
+    "clean:functions": "rm -rf \"../functions/node_modules\" && rm -rf \"../functions/.nuxt\"",
+    "clean:static": "rm -rf \"static/sw.js\"",
+    "clean": "npm run clean:public && npm run clean:functions && npm run clean:static",
+    "copy:nuxt": "mkdir ../public/_nuxt && cp -r ../functions/.nuxt/dist/* ../public/_nuxt",
+    "copy:static": "cp -r static/* ../public",
+    "copy": "npm run copy:nuxt && npm run copy:static",
+    "build:firebase": "npm run clean && npm run build && npm run copy && cd ../functions && npm i",
+    "start:firebase": "firebase serve --only functions,hosting",
+    "deploy": "firebase deploy --only functions,hosting"
   },
   "dependencies": {
     "@nuxt/typescript-runtime": "^2.0.1",
