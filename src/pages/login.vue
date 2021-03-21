@@ -36,18 +36,18 @@
               type="password"
               required
               name="password"
-              maxlength="100"
             />
           </div>
         </li>
       </ul>
-      <div class="flex-row">
+      <div class="flex-column">
         <BaseButton
           html-type="submit"
           visual-type="success"
           :loading="loginLoading"
           >Continuer</BaseButton
         >
+        <BaseLink :link="linkToSignin">{{linkToSignin.title}}</BaseLink>
       </div>
     </form>
   </section>
@@ -59,6 +59,7 @@ import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import BaseAlertModele from '~/components/Atoms/Alert/BaseAlertModele'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
+import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 
 export default defineComponent({
   name: 'LoginPage',
@@ -72,12 +73,14 @@ export default defineComponent({
     const password: string = ''
     const alert: BaseAlertModele = new BaseAlertModele('', '')
     const loginLoading: boolean = false
+    const linkToSignin: BaseLinkModele = new BaseLinkModele(['signin'], 'Pas de compte ? En créer un.', true)
 
     return {
       email,
       password,
       alert,
       loginLoading,
+      linkToSignin,
     }
   },
   methods: {
@@ -133,6 +136,10 @@ form > ul > li > div > label span.required-field {
 
 form ul li div.input-row {
   width: 98%;
+}
+
+form div.flex-column a{
+  padding: 12px 0;
 }
 
 @media screen and (max-width: 760px) {
