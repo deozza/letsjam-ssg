@@ -54,20 +54,23 @@
       maxlength="200">
     <BaseParagraph>Séparez les catégories par un espace</BaseParagraph>
 
-    <BaseButton
-      html-type="button"
-      visual-type="success"
-      :loading="postLoading"
-      @buttonClicked="post(false)"
+    <div class="button-container">
+      <BaseButton
+        html-type="button"
+        visual-type="success"
+        :loading="postLoading"
+        @buttonClicked="post(false)"
       >Poster</BaseButton
-    >
-    <BaseButton
-      html-type="button"
-      visual-type="primary"
-      :loading="postLoading"
-      @buttonClicked="post(true)"
-    >Sauvegarder le brouillon</BaseButton
-    >
+      >
+      <BaseButton
+        html-type="button"
+        visual-type="primary"
+        :loading="postLoading"
+        @buttonClicked="post(true)"
+      >Sauvegarder le brouillon</BaseButton
+      >
+    </div>
+    <BaseParagraph visual-type="danger" v-if="error !== ''">{{error}}</BaseParagraph>
   </section>
 </template>
 
@@ -95,6 +98,7 @@ export default defineComponent({
     const articleContent: string = ''
     const articleTags: string = ''
     const articleTitle: string = ''
+    const error: string = ''
 
     const alert: BaseAlertModele = new BaseAlertModele('', '')
 
@@ -115,12 +119,14 @@ export default defineComponent({
       authorLink,
       alert,
       postLoading,
+      error,
       cssVars,
     }
   },
   methods: {
     async post(isDraft: boolean) {
       this.postLoading = true
+      this.error = ''
       const user = this.$store.state.user.authUser
 
       const article: ArticlePost = new ArticlePost({
@@ -146,20 +152,35 @@ export default defineComponent({
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(article.uid)
+      const uniqueArticleRef = this.$fire.firestore
+        .collection('uniqueArticlePerUser')
+        .doc(encodeURI(article.title)+encodeURI(user.displayName))
 
-      await articleRef
-        .set(article.toJSON())
+      await uniqueArticleRef
+        .set({articleUid: article.title, authorUid: article.authorUid})
         .then(() => {
-          articleVersionRef.set(articleVersion.toJSON())
+          articleRef
+            .set(article.toJSON())
+            .then(() => {
+              articleVersionRef.set(articleVersion.toJSON())
+            })
+            .then(() => {
+              this.postLoading = false
+              this.$router.push({
+                path: '/profile',
+                query: { success: 'true' },
+              })
+            })
+            .catch(() => {
+              this.postLoading = false
+              this.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
+
+            })
         })
-        .then(() => {
+        .catch(() => {
           this.postLoading = false
-          this.$router.push({
-            path: '/profile',
-            query: { success: 'true' },
-          })
+          this.error = 'Vous avez déjà posté un article avec le même nom.'
         })
-        .catch(() => (this.postLoading = false))
     },
   },
 })
@@ -304,5 +325,9 @@ section#preview div.content > ol {
 
 section#preview div.content > ul > li {
   list-style: inside;
+}
+
+div.button-container{
+  margin: 24px 0
 }
 </style>
