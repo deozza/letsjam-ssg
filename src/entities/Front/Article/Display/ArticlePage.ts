@@ -9,6 +9,7 @@ export default class ArticlePage {
   tags: Array<string>
   content: string
   authorLink: BaseLinkModele
+  isLikedByReader: boolean
 
   constructor(article: ArticleGql) {
     // @ts-ignore
@@ -35,6 +36,8 @@ export default class ArticlePage {
       this.title,
       true
     )
+
+    this.isLikedByReader= article.isLikedByReader
   }
 
   toJSON(): any {

@@ -28,8 +28,17 @@
       />
       <div class="article-header">
         <div class="flex-row flex-left">
-          <BaseParagraph class="p-footer"
-            >{{ article.totalLikes }} <i class="far fa-heart"></i
+          <BaseParagraph
+            class="p-footer"
+            >{{ article.totalLikes }} <i
+            class="fa-heart"
+            :class="{
+              'like-hover': isLoggedIn,
+              'fas': article.isLikedByReader,
+              'far': !article.isLikedByReader
+            }"
+            @click="likeArticle()"
+          ></i
           ></BaseParagraph>
         </div>
       </div>
@@ -51,6 +60,8 @@ import ArticlePage from '~/entities/Front/Article/Display/ArticlePage'
 import articleQuery from '~/apollo/queries/Article/article.gql'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import BaseArticleLoading from '~/components/Molecules/Article/BaseArticleLoading.vue'
+import UserArticleLike from '~/entities/Api/Article/UserArticleLike'
+import User from '~/entities/Api/User/User'
 
 export default defineComponent({
   name: 'ArticleViewPage',
@@ -64,6 +75,9 @@ export default defineComponent({
     const context = useContext()
     const params = context.params.value
     const article = ref<ArticlePage>({} as ArticlePage)
+    const articleGql = ref<ArticleGql>({} as ArticleGql)
+    const isLoggedIn = context.store.getters['user/isLoggedIn'];
+    const user: User = context.store.getters['user/loggedUser'];
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -73,21 +87,72 @@ export default defineComponent({
           variables: {
             displayName: decodeURI(params.username),
             title: decodeURI(params.title),
+            readerUid: user.uid
           },
         })
         .then((articleFromGQL: any) => {
-          const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
-          article.value = new ArticlePage(articleGql)
+          const articleGqlAsObject: ArticleGql = new ArticleGql(articleFromGQL.data.article)
+
+          article.value = new ArticlePage(articleGqlAsObject)
+          articleGql.value = new ArticleGql(articleGqlAsObject)
         })
         .catch((e: any) => console.log(e))
     })
 
-    return { article }
+    return {
+      article,
+      articleGql,
+      isLoggedIn
+    }
   },
   methods: {
     getDateFromTimestamp(timestamp: string) {
       const timestampAsNumber: number = +timestamp
       return new Date(timestampAsNumber).toLocaleString()
+    },
+    async likeArticle(){
+      if(!this.isLoggedIn){
+        return
+      }
+
+      const user: User = this.$store.getters['user/loggedUser']
+      const userArticleLikeRef = this.$fire.firestore
+        .collection('userArticleLike')
+        .doc(encodeURI(this.article.title+user.displayName))
+
+      if(this.article.isLikedByReader !== true){
+        await this.createALike(user, userArticleLikeRef)
+      }else{
+        await this.removeALike(userArticleLikeRef)
+      }
+
+    },
+    async createALike(user: User, userArticleLikeRef: any){
+
+      const userArticleLike: UserArticleLike = new UserArticleLike({
+        userUid: user.uid,
+        articleUid: this.articleGql.uid,
+        articleVersionUid: this.articleGql.currentVersion.uid
+      })
+
+      await userArticleLikeRef
+        .set(userArticleLike.toJSON())
+        .then(() => {
+          this.article.totalLikes += 1
+          this.article.isLikedByReader = true
+        })
+        .catch((e: any) => {
+        })
+    },
+    async removeALike(userArticleLikeRef: any){
+      await userArticleLikeRef
+        .delete()
+        .then(() => {
+          this.article.totalLikes -= 1
+          this.article.isLikedByReader = false
+        })
+        .catch((e: any) => {
+        })
     },
   },
 })
@@ -142,5 +207,13 @@ div.article-content > ol {
 
 div.article-content > ul > li {
   list-style: inside;
+}
+
+p.p-footer i.like-hover:hover{
+  cursor: pointer;
+}
+
+p.p-footer i.fas.fa-heart{
+  color: red;
 }
 </style>
