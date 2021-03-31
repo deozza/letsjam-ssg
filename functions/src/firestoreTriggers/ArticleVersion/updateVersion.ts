@@ -1,6 +1,6 @@
 import {functions, FieldValue, db} from "../initializeTriggers";
 
-exports.changeState = functions
+exports.updateVersionState = functions
     .region("us-central1")
     .firestore
     .document("articleVersion/{articleVersionUid}")
