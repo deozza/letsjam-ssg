@@ -43,36 +43,82 @@
       </div>
     </div>
 
-    <input
-      id="tags"
-      v-model="articleTags"
-      type="text"
-      required
-      placeholder="Catégories de votre article"
-      name="Catégories de votre article"
-      minlength="5"
-      maxlength="200">
-    <BaseParagraph>Séparez les catégories par un espace</BaseParagraph>
 
-    <BaseButton
-      html-type="button"
-      visual-type="success"
-      :loading="postLoading"
-      @buttonClicked="post(false)"
+    <div class="flex-row flex-left selected-tags" style="width: 100%">
+      <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
+      <BaseButton
+        v-for="(tag, index) of articleTags" :key="index"
+        visual-type="primary"
+        :outline="true"
+        icon="times"
+        @buttonClicked="removeTag(tag)"
+      >
+        {{tag}}
+      </BaseButton>
+    </div>
+
+    <div class="flex-row flex-between">
+      <div  style="width: 33%">
+        <input
+          id="tag"
+          v-model="newTag"
+          type="text"
+          class=""
+          required
+          placeholder="Ajouter une catégorie"
+          name="Ajouter une catégorie"
+          minlength="1"
+          maxlength="200"
+        />
+        <BaseButton
+          html-type="button"
+          visual-type="primary"
+          icon="plus"
+          @buttonClicked="addTag(newTag, true)"
+        >Ajouter</BaseButton
+        >
+      </div>
+      <div >
+        <BaseParagraph visual-type="light">Propositions de catégories :</BaseParagraph>
+        <div class="flex-row flex-left">
+          <BaseButton
+            v-for="(tag, index) of tagsPresetLeft" :key="index"
+            visual-type="primary"
+            :outline="true"
+            icon="plus"
+            @buttonClicked="addTag(tag)"
+          >
+            {{tag}}
+          </BaseButton>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="button-container">
+      <BaseButton
+        html-type="button"
+        visual-type="success"
+        :loading="postLoading"
+        icon="check"
+        @buttonClicked="post(false)"
       >Poster</BaseButton
-    >
-    <BaseButton
-      html-type="button"
-      visual-type="primary"
-      :loading="postLoading"
-      @buttonClicked="post(true)"
-    >Sauvegarder le brouillon</BaseButton
-    >
+      >
+      <BaseButton
+        html-type="button"
+        visual-type="primary"
+        :loading="postLoading"
+        icon="save"
+        @buttonClicked="post(true)"
+      >Sauvegarder le brouillon</BaseButton
+      >
+    </div>
+    <BaseParagraph visual-type="danger" v-if="error !== ''">{{error}}</BaseParagraph>
   </section>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, useContext } from '@nuxtjs/composition-api'
+import { defineComponent, ref, useContext, useFetch } from '@nuxtjs/composition-api'
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 import BaseAlertModele from '~/components/Atoms/Alert/BaseAlertModele'
@@ -81,6 +127,7 @@ import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/Arti
 import ArticlePost from '~/entities/Api/Article/ArticlePost'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
+import tagsQuery from '~/apollo/queries/Tags/tags.gql'
 
 export default defineComponent({
   name: 'PostArticlePage',
@@ -92,9 +139,13 @@ export default defineComponent({
   setup({ maxWidth }) {
     const context = useContext()
     const articleAuthor: User = context.store.state.user.authUser
+    const articleTags: Array<string> = []
+    const tagsPreset = ref<Array<string>>([])
+    const tagsPresetLeft = ref<Array<string>>([])
     const articleContent: string = ''
-    const articleTags: string = ''
+    const newTag: string = ''
     const articleTitle: string = ''
+    const error: string = ''
 
     const alert: BaseAlertModele = new BaseAlertModele('', '')
 
@@ -108,25 +159,65 @@ export default defineComponent({
 
     const cssVars = ref({ '--max-width': maxWidth })
 
+    useFetch(async () => {
+      await context.app.apolloProvider.defaultClient
+        .query({
+          query: tagsQuery,
+          prefetch: true
+        })
+        .then((tagsFromGQL: any) => {
+          tagsFromGQL.data.tags.forEach((tagFromGql: any) => {
+            tagsPreset.value.push(tagFromGql.name)
+            tagsPresetLeft.value.push(tagFromGql.name)
+          })
+        })
+        .catch((e: any) => console.log(e))
+    })
+
     return {
+      newTag,
       articleContent,
-      articleTags,
       articleTitle,
+      articleTags,
       authorLink,
       alert,
       postLoading,
+      error,
       cssVars,
+      tagsPreset,
+      tagsPresetLeft
     }
   },
   methods: {
+    addTag(tagName: string, manual: boolean = false){
+      if(tagName.length < 3){
+        return
+      }
+      this.articleTags.push(tagName)
+
+      if(manual === false || this.tagsPresetLeft.includes(tagName) === true){
+        this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tagName), 1)
+      }else{
+        this.newTag = ''
+      }
+
+    },
+    removeTag(tagName: string){
+      this.articleTags.splice(this.articleTags.indexOf(tagName), 1)
+
+      if(this.tagsPreset.includes(tagName) === true && this.tagsPresetLeft.includes(tagName) === false){
+        this.tagsPresetLeft.push(tagName)
+      }
+    },
     async post(isDraft: boolean) {
       this.postLoading = true
+      this.error = ''
       const user = this.$store.state.user.authUser
 
       const article: ArticlePost = new ArticlePost({
         authorUid: user.uid,
         title: this.articleTitle,
-        tags: this.articleTags.split(' '),
+        tags: this.articleTags,
       })
 
       const articleVersion: ArticleVersion = new ArticleVersion({})
@@ -146,20 +237,35 @@ export default defineComponent({
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(article.uid)
+      const uniqueArticleRef = this.$fire.firestore
+        .collection('uniqueArticlePerUser')
+        .doc(encodeURI(article.title)+encodeURI(user.displayName))
 
-      await articleRef
-        .set(article.toJSON())
+      await uniqueArticleRef
+        .set({articleUid: article.title, authorUid: article.authorUid})
         .then(() => {
-          articleVersionRef.set(articleVersion.toJSON())
+          articleRef
+            .set(article.toJSON())
+            .then(() => {
+              articleVersionRef.set(articleVersion.toJSON())
+            })
+            .then(() => {
+              this.postLoading = false
+              this.$router.push({
+                path: '/profile',
+                query: { success: 'true' },
+              })
+            })
+            .catch(() => {
+              this.postLoading = false
+              this.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
+
+            })
         })
-        .then(() => {
+        .catch(() => {
           this.postLoading = false
-          this.$router.push({
-            path: '/profile',
-            query: { success: 'true' },
-          })
+          this.error = 'Vous avez déjà posté un article avec le même nom.'
         })
-        .catch(() => (this.postLoading = false))
     },
   },
 })
@@ -270,6 +376,14 @@ input.input-text-title {
   margin-bottom: 24px;
 }
 
+p.selected-tags{
+  margin-bottom: 24px;
+}
+
+p.selected-tags > p{
+  margin-right: 12px;
+}
+
 section#preview div.content {
   padding-top: 24px;
 }
@@ -305,4 +419,17 @@ section#preview div.content > ol {
 section#preview div.content > ul > li {
   list-style: inside;
 }
+
+p.tag-pill:hover > i{
+  color: white
+}
+
+div.selected-tags{
+  margin: 12px 0
+}
+
+div.button-container{
+  margin: 24px 0;
+}
+
 </style>

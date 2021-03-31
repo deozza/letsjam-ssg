@@ -77,9 +77,7 @@ const config: NuxtConfig = {
         // emulatorPort: 9099,
         // emulatorHost: 'http://localhost',
       },
-      firestore: true,
-      analytics: true,
-      performance: true
+      firestore: true
     },
   },
   apollo: {

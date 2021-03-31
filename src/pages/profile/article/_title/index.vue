@@ -22,22 +22,41 @@
         </div>
       </section>
 
-      <section>
-        <div class="flex-row flex-between">
+      <div class="flex-row flex-left selected-tags" style="width: 100%">
+        <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
+        <BaseButton
+          v-for="(tag, index) of article.tags" :key="index"
+          visual-type="primary"
+          :outline="true"
+          icon="times"
+          @buttonClicked="removeTag(tag)"
+        >
+          {{tag}}
+        </BaseButton>
+      </div>
+
+      <div class="flex-row flex-between">
+        <div  style="width: 33%">
           <input
-            id="tags"
-            v-model="tags"
+            id="tag"
+            v-model="newTag"
             type="text"
-            class="input-text-title"
+            class=""
             required
-            placeholder="Catégories de votre article"
-            name="Catégories de votre article"
-            minlength="5"
+            placeholder="Ajouter une catégorie"
+            name="Ajouter une catégorie"
+            minlength="1"
             maxlength="200"
           />
-          <BaseButton v-if="!article.allVersionsAreArchived" html-type="submit" visual-type="success" @buttonClicked="updateTags()" :loading="updateTagsLoading">Editer les catégories</BaseButton>
+          <BaseButton
+            html-type="button"
+            visual-type="primary"
+            icon="plus"
+            @buttonClicked="addTag(newTag, true)"
+          >Ajouter</BaseButton
+          >
         </div>
-      </section>
+      </div>
 
       <section class="publishedVersion" v-if="article.publishedVersion !== null">
         <BaseHeader html-type="h3">Version en ligne :</BaseHeader>
@@ -147,7 +166,7 @@ export default defineComponent({
     const context = useContext()
     const params = context.params.value
     const article = ref<ArticlePageEdit>({} as ArticlePageEdit)
-    const tags = ref<string>('')
+    const newTag: string = ''
     const updateTitleLoading: boolean = false
     const updateTagsLoading: boolean = false
     const newArticleVersionLoading: boolean = false
@@ -170,14 +189,13 @@ export default defineComponent({
         .then((articleFromGQL: any) => {
           const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
           article.value = new ArticlePageEdit(articleGql)
-          tags.value = articleGql.tags.join(' ')
         })
         .catch((e: any) => console.log(e))
     })
 
     return {
       article,
-      tags,
+      newTag,
       updateTitleLoading,
       updateTagsLoading,
       newArticleVersionLoading,
@@ -204,21 +222,40 @@ export default defineComponent({
           this.updateTitleLoading = false
         })
     },
-    async updateTags(){
+    async addTag(tagName: string){
       this.updateTagsLoading = true
+      this.article.tags.push(tagName)
+
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(this.article.uid)
 
       await articleRef
-        .update({tags: this.tags.split(' ')})
+        .update({tags: this.article.tags})
         .then(() => {
           this.updateTagsLoading = false
+          this.newTag = ''
         })
         .catch((e) => {
-          console.log(this.tags)
-          console.log(this.tags.split(' '))
-          console.log(e)
+          this.updateTagsLoading = false
+        })
+    },
+    async removeTag(tagName: string){
+      this.updateTagsLoading = true
+      this.article.tags.splice(this.article.tags.indexOf(tagName), 1)
+
+      const articleRef = this.$fire.firestore
+        .collection('articles')
+        .doc(this.article.uid)
+
+      await articleRef
+        .update({tags: this.article.tags})
+        .then(() => {
+          this.updateTagsLoading = false
+          this.newTag = ''
+
+        })
+        .catch((e) => {
           this.updateTagsLoading = false
         })
     },
