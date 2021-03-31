@@ -5,8 +5,8 @@ service cloud.firestore {
     	allow list: if isPublished(resource.data.currentVersion) || (isAuth() && isOwner(resource.data.authorUid));
     	allow get: if isPublished(resource.data.currentVersion) || (isAuth() && isOwner(resource.data.authorUid));
       allow create: if isAuth();
-      allow update: if isAuth() && isOwner(resource.data.authorUid);
-      allow delete: if isAuth() && isOwner(resource.data.authorUid);
+      allow update: if isAuth();
+      allow delete: if isAuth();
     }
 
     match /articleVersion/{articleVersionId}{
@@ -26,7 +26,7 @@ service cloud.firestore {
     match /userArticleLike/{userArticleLikeId}{
      allow read;
      allow create : if isAuth();
-     allow delete: if isAuth() && isOwner(resource.data.userUid);
+     allow delete: if isAuth();
     }
 
     function isAuth(){
