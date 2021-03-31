@@ -62,6 +62,11 @@ export default defineComponent({
       navbarIsToggled,
     }
   },
+  watch: {
+    '$route': function(){
+      this.navbarIsToggled = false
+    }
+  }
 })
 </script>
 

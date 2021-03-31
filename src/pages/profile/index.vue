@@ -152,6 +152,7 @@ div.flex-row section {
   min-height: 50vh;
   background-color: white;
   padding: 12px;
+  margin-bottom: 12px;
 }
 
 div.flex-row section.profile-info {
@@ -162,7 +163,6 @@ div.flex-row section.profile-info button {
   margin-top: 24px;
   margin-left: 0;
 }
-
 
 div.flex-row section.articles-posted {
   width: 75%;
@@ -223,10 +223,12 @@ table tbody tr td span i {
   padding-right: 6px;
 }
 
+
 div.flex-row section.articles-liked {
-  margin: 12px 0 0 25%;
+  margin: 12px 0 0 0;
   width: 75%;
 }
+
 div.liked-articles-container {
   width: 90%;
 }
@@ -247,18 +249,29 @@ div.liked-articles-container div.flex-column div.flex-row{
   width: 100%;
   padding-bottom: 12px;
 }
+
 div.liked-articles-container div.flex-column div.flex-row p.liked-article-title{
   font-size: 1.75rem;
   font-weight: bold;
+}
+
+div.liked-articles-container div.flex-column p{
+  overflow-wrap: anywhere;
 }
 
 @media screen and (min-width: 1024px) {
   tbody tr:last-of-type {
     border-bottom: 2px solid #009879;
   }
+  div.flex-row section.articles-liked {
+    margin-left:25%;
+  }
 }
 
 @media screen and (max-width: 1024px) {
+  div.flex-row section{
+    width: 100% !important;
+  }
   table {
     border: 0;
   }
