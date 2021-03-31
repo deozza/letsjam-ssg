@@ -14,10 +14,15 @@ import {User} from "./utils/interfaces/User";
 import {ArticleVersion} from "./utils/interfaces/ArticleVersion";
 // eslint-disable-next-line no-unused-vars
 import {UserArticleLike} from "./utils/interfaces/UserArticleLike";
+// eslint-disable-next-line no-unused-vars
+import {Tag} from "./utils/interfaces/Tag";
 const fbApp = require("../initializeApp");
 
-
 const typeDefs = gql`
+  type Tag {
+    name: String!
+  }
+
   type User {
     displayName: String!
     email: String!
@@ -57,6 +62,7 @@ const typeDefs = gql`
   }
 
   type Query {
+    tags: [Tag]
     articles: [Articles]
     article(displayName: String!, title: String!, readerUid: String): Articles
     profile(displayName: String!): User
@@ -221,6 +227,19 @@ const resolvers = {
     },
   },
   Query: {
+    async tags() {
+      try {
+        const tags = await fbApp.admin
+            .firestore()
+            .collection("tags")
+            .orderBy("name", "ASC")
+            .get();
+
+        return tags.docs.map((tag: any) => tag.data()) as Tag[];
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
     async articles() {
       try {
         const articles = await fbApp.admin
