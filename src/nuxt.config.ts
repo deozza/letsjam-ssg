@@ -78,7 +78,8 @@ const config: NuxtConfig = {
         // emulatorHost: 'http://localhost',
       },
       firestore: true,
-      storage: true,
+      analytics: true,
+      performance: true
     },
   },
   apollo: {
