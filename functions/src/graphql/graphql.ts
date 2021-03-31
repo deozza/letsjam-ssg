@@ -12,6 +12,8 @@ import {Article} from "./utils/interfaces/Article";
 import {User} from "./utils/interfaces/User";
 // eslint-disable-next-line no-unused-vars
 import {ArticleVersion} from "./utils/interfaces/ArticleVersion";
+// eslint-disable-next-line no-unused-vars
+import {UserArticleLike} from "./utils/interfaces/UserArticleLike";
 const fbApp = require("../initializeApp");
 
 
@@ -20,6 +22,7 @@ const typeDefs = gql`
     displayName: String!
     email: String!
     articles: [Articles]!
+    likedArticles: [UserArticleLike]!
   }
 
   type Articles {
@@ -32,6 +35,8 @@ const typeDefs = gql`
     currentVersion: ArticleVersions
     tags: [String]!
     user: User!
+    likedBy: [UserArticleLike]!
+    isLikedByReader(readerUid: String): Boolean
   }
 
   type ArticleVersions {
@@ -45,9 +50,15 @@ const typeDefs = gql`
     article: Articles
   }
 
+  type UserArticleLike {
+    article: Articles!
+    articleVersion: ArticleVersions!
+    user: User!
+  }
+
   type Query {
     articles: [Articles]
-    article(displayName: String!, title: String!): Articles
+    article(displayName: String!, title: String!, readerUid: String): Articles
     profile(displayName: String!): User
   }
 `;
@@ -63,6 +74,19 @@ const resolvers = {
             .get();
 
         return userArticles.docs.map((article: any) => article.data()) as Article[];
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async likedArticles(user: any) {
+      try {
+        const likedArticles = await fbApp.admin
+            .firestore()
+            .collection("userArticleLike")
+            .where("userUid", "==", user.uid)
+            .get();
+
+        return likedArticles.docs.map((article: any) => article.data()) as UserArticleLike[];
       } catch (e) {
         throw new ApolloError(e);
       }
@@ -110,6 +134,39 @@ const resolvers = {
 
       return {} as ArticleVersion;
     },
+    async likedBy(article: any) {
+      if (article.currentVersion !== "") {
+        try {
+          const userArticleLike = await fbApp.admin
+              .firestore()
+              .collection("userArticleLike")
+              .where("articleUid", "==", article.uid)
+              .get();
+
+          return userArticleLike.docs.map((like: any) => like.data()) as UserArticleLike[];
+        } catch (e) {
+          throw new ApolloError(e);
+        }
+      }
+
+      return {} as UserArticleLike;
+    },
+    async isLikedByReader(article:any, args: any) {
+      console.log(args);
+
+      try {
+        const userArticleLike = await fbApp.admin
+            .firestore()
+            .collection("userArticleLike")
+            .where("articleUid", "==", article.uid)
+            .where("userUid", "==", args.readerUid)
+            .get();
+
+        return userArticleLike.docs.length > 0;
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
   },
   ArticleVersions: {
     async article(articleVersion: any) {
@@ -120,6 +177,44 @@ const resolvers = {
             .get();
 
         return article.data() as Article;
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+  },
+  UserArticleLike: {
+    async article(userArticleLike: any) {
+      try {
+        const article = await fbApp.admin
+            .firestore()
+            .doc(`articles/${userArticleLike.articleUid}`)
+            .get();
+
+        return article.data() as Article;
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async articleVersion(userArticleLike: any) {
+      try {
+        const articleVersion = await fbApp.admin
+            .firestore()
+            .doc(`articleVersion/${userArticleLike.articleVersionUid}`)
+            .get();
+
+        return articleVersion.data() as ArticleVersion;
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async user(userArticleLike: any) {
+      try {
+        const user = await fbApp.admin
+            .firestore()
+            .doc(`users/${userArticleLike.userUid}`)
+            .get();
+
+        return user.data() as User;
       } catch (e) {
         throw new ApolloError(e);
       }
@@ -139,7 +234,7 @@ const resolvers = {
         throw new ApolloError(e);
       }
     },
-    async article(_: null, args:{displayName: string, title: string}) {
+    async article(_: null, args:{displayName: string, title: string, readerUid: string}) {
       try {
         const userQuery = await fbApp.admin
             .firestore()

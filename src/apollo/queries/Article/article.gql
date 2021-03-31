@@ -1,9 +1,11 @@
-query articleQuery($displayName: String!, $title: String!){
+query articleQuery($displayName: String!, $title: String!, $readerUid: String = ""){
   article(displayName: $displayName, title: $title){
+    uid,
     title,
-    currentVersion{content},
+    currentVersion{content, uid},
     dateOfLastUpdate,
     user{displayName},
-    totalLikes
+    totalLikes,
+    isLikedByReader(readerUid: $readerUid)
   }
 }

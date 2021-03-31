@@ -8,6 +8,7 @@ export default class ArticleCardInfo {
   totalLikes: number
   articleLink: BaseLinkModele
   authorLink: BaseLinkModele
+  tags: Array<string>
 
   constructor(articleGql: ArticleGql) {
     // @ts-ignore
@@ -32,6 +33,8 @@ export default class ArticleCardInfo {
       this.title,
       true
     )
+
+    this.tags = articleGql.tags
   }
 
   toJSON(): any {

@@ -10,6 +10,17 @@ query profileQuery($displayName: String!){
       currentVersion{
         state
       }
+    },
+    likedArticles{
+      article{
+        title,
+        user{
+          displayName
+        }
+        currentVersion{
+          content
+        }
+      }
     }
   }
 }

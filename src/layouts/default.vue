@@ -74,7 +74,7 @@ export default defineComponent({
     )
     const logoutLink: BaseLinkModele = new BaseLinkModele(
       ['logout'],
-      'Déconection',
+      'Déconnection',
       true,
       'fas fa-power-off'
     )

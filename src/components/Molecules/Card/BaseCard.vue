@@ -19,11 +19,14 @@
         }}</BaseHeader>
       </BaseLink>
     </div>
-    <div class="card-header">
-      <div class="flex-row flex-left">
+    <div class="card-header card-footer">
+      <div class="flex-row flex-between">
         <BaseParagraph class="p-footer"
           >{{ article.totalLikes }} <i class="far fa-heart"></i
         ></BaseParagraph>
+        <BaseParagraph visual-type="light" class="article-tags">
+          <span v-for="(tag, index) in article.tags" :key="index">#{{tag}}</span>
+        </BaseParagraph>
       </div>
     </div>
   </div>
@@ -78,6 +81,14 @@ div.article-card > div.card-content {
 
 div.article-card > div.card-header {
   padding-left: 24px;
+}
+
+div.article-card > div.card-header.card-footer {
+  width: 95%;
+}
+
+div.article-card > div.card-header.card-footer > div > p > span{
+  margin-right: 12px;
 }
 
 div.article-card > div.card-content > a {

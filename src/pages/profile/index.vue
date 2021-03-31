@@ -49,6 +49,21 @@
           </tbody>
         </table>
       </section>
+      <section class="articles-liked">
+        <BaseHeader html-type="h3">Articles que j'ai liké</BaseHeader>
+        <div v-if="this.likedArticlesInfo.length === 0">
+          <BaseParagraph visual-type="light">Aucun article ne vous a plus...</BaseParagraph>
+        </div>
+        <div v-else class="flex-column flex-left liked-articles-container">
+          <div class="flex-column flex-left"  v-for="(article, index) in likedArticlesInfo" :key="index" @click="goToArticle(article)">
+            <div class="flex-row flex-between">
+              <BaseParagraph visual-type="light" class="liked-article-title">{{article.title}}</BaseParagraph>
+              <BaseParagraph visual-type="light" >par {{article.authorDisplayName}}</BaseParagraph>
+            </div>
+            <BaseParagraph visual-type="light">{{article.contentExtract}}</BaseParagraph>
+          </div>
+        </div>
+      </section>
     </div>
   </section>
 </template>
@@ -65,6 +80,7 @@ import ArticleCardInfoProfilePage from '~/entities/Front/Article/Display/Article
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import User from '~/entities/Api/User/User'
+import LikedArticleProfilePage from '~/entities/Front/Article/Display/LikedArticleProfilePage'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -78,6 +94,7 @@ export default defineComponent({
     const context = useContext()
     const profile = ref<Profile>({} as Profile)
     const articles = ref<ArticleCardInfoProfilePage[]>([])
+    const likedArticlesInfo = ref<LikedArticleProfilePage[]>([])
     const user: User = new User(context.$fire.auth.currentUser)
     const userDisplayName: string = user.displayName
 
@@ -101,16 +118,30 @@ export default defineComponent({
             const articleCardInfo: ArticleCardInfoProfilePage = new ArticleCardInfoProfilePage(publicArticle)
             articles.value.push(articleCardInfo)
           })
+
+          const likedArticles: Array<ArticleGql> = []
+          profileFromGQL.data.profile.likedArticles.forEach((article: any) => {
+            likedArticles.push(new ArticleGql(article.article))
+          })
+
+          likedArticles.forEach((likedArticle: ArticleGql) => {
+            const likedArticleInfo: LikedArticleProfilePage = new LikedArticleProfilePage(likedArticle)
+            likedArticlesInfo.value.push(likedArticleInfo)
+          })
+
         })
         .catch((e: any) => console.log(e))
     })
 
-    return { articles, profile }
+    return { articles, profile, likedArticlesInfo }
   },
   methods: {
     async redirectToEditProfile() {
       await this.$router.push('/profile/edit')
     },
+    async goToArticle(article: LikedArticleProfilePage){
+      await this.$router.push('/user/'+encodeURI(article.authorDisplayName)+'/article/'+encodeURI(article.title))
+    }
 
   },
 })
@@ -121,6 +152,7 @@ div.flex-row section {
   min-height: 50vh;
   background-color: white;
   padding: 12px;
+  margin-bottom: 12px;
 }
 
 div.flex-row section.profile-info {
@@ -132,11 +164,9 @@ div.flex-row section.profile-info button {
   margin-left: 0;
 }
 
-
 div.flex-row section.articles-posted {
   width: 75%;
 }
-
 
 table {
   border-collapse: collapse;
@@ -192,13 +222,56 @@ table tbody tr td span i {
   padding-left: 6px;
   padding-right: 6px;
 }
+
+
+div.flex-row section.articles-liked {
+  margin: 12px 0 0 0;
+  width: 75%;
+}
+
+div.liked-articles-container {
+  width: 90%;
+}
+
+div.liked-articles-container div.flex-column{
+  width: 100%;
+  border:2px var(--secondary_bg) solid;
+  padding: 12px;
+  margin-bottom: 24px;
+  border-radius: 3px;
+}
+
+div.liked-articles-container div.flex-column:hover{
+  cursor: pointer;
+}
+
+div.liked-articles-container div.flex-column div.flex-row{
+  width: 100%;
+  padding-bottom: 12px;
+}
+
+div.liked-articles-container div.flex-column div.flex-row p.liked-article-title{
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+div.liked-articles-container div.flex-column p{
+  overflow-wrap: anywhere;
+}
+
 @media screen and (min-width: 1024px) {
   tbody tr:last-of-type {
     border-bottom: 2px solid #009879;
   }
+  div.flex-row section.articles-liked {
+    margin-left:25%;
+  }
 }
 
 @media screen and (max-width: 1024px) {
+  div.flex-row section{
+    width: 100% !important;
+  }
   table {
     border: 0;
   }

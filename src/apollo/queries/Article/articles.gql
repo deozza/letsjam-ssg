@@ -4,6 +4,7 @@ query articlesQuery{
     dateOfLastUpdate,
     user{displayName},
     totalLikes,
-    currentVersion{state}
+    currentVersion{state},
+    tags
   }
 }

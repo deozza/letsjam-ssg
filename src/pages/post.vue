@@ -42,6 +42,18 @@
         </section>
       </div>
     </div>
+
+    <input
+      id="tags"
+      v-model="articleTags"
+      type="text"
+      required
+      placeholder="Catégories de votre article"
+      name="Catégories de votre article"
+      minlength="5"
+      maxlength="200">
+    <BaseParagraph>Séparez les catégories par un espace</BaseParagraph>
+
     <BaseButton
       html-type="button"
       visual-type="success"
@@ -68,12 +80,14 @@ import User from '~/entities/Api/User/User'
 import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import ArticlePost from '~/entities/Api/Article/ArticlePost'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
+import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 
 export default defineComponent({
   name: 'PostArticlePage',
   components: {
     BaseHeader,
     BaseButton,
+    BaseParagraph,
   },
   setup({ maxWidth }) {
     const context = useContext()
@@ -112,7 +126,7 @@ export default defineComponent({
       const article: ArticlePost = new ArticlePost({
         authorUid: user.uid,
         title: this.articleTitle,
-        tags: this.articleTags,
+        tags: this.articleTags.split(' '),
       })
 
       const articleVersion: ArticleVersion = new ArticleVersion({})
@@ -253,6 +267,7 @@ input.input-text-title {
 
 .tabset {
   max-width: 65em;
+  margin-bottom: 24px;
 }
 
 section#preview div.content {

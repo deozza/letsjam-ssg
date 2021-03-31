@@ -49,6 +49,13 @@ export const getters: GetterTree<RootState, RootState> = {
       return false
     }
   },
+  loggedUser: (state) => {
+    try{
+      return state.authUser
+    }catch {
+      return false
+    }
+  }
 }
 
 export const mutations: MutationTree<RootState> = {

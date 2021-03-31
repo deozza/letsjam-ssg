@@ -18,6 +18,7 @@ query articleEditQuery($displayName: String!, $title: String!){
     }
     dateOfCreation,
     dateOfLastUpdate,
-    totalLikes
+    totalLikes,
+    tags
   }
 }

@@ -22,6 +22,23 @@
         </div>
       </section>
 
+      <section>
+        <div class="flex-row flex-between">
+          <input
+            id="tags"
+            v-model="tags"
+            type="text"
+            class="input-text-title"
+            required
+            placeholder="Catégories de votre article"
+            name="Catégories de votre article"
+            minlength="5"
+            maxlength="200"
+          />
+          <BaseButton v-if="!article.allVersionsAreArchived" html-type="submit" visual-type="success" @buttonClicked="updateTags()" :loading="updateTagsLoading">Editer les catégories</BaseButton>
+        </div>
+      </section>
+
       <section class="publishedVersion" v-if="article.publishedVersion !== null">
         <BaseHeader html-type="h3">Version en ligne :</BaseHeader>
         <textarea
@@ -130,7 +147,9 @@ export default defineComponent({
     const context = useContext()
     const params = context.params.value
     const article = ref<ArticlePageEdit>({} as ArticlePageEdit)
+    const tags = ref<string>('')
     const updateTitleLoading: boolean = false
+    const updateTagsLoading: boolean = false
     const newArticleVersionLoading: boolean = false
     const updateLastVersionLoading: boolean = false
     const updateDraftLoading: boolean = false
@@ -151,13 +170,16 @@ export default defineComponent({
         .then((articleFromGQL: any) => {
           const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
           article.value = new ArticlePageEdit(articleGql)
+          tags.value = articleGql.tags.join(' ')
         })
         .catch((e: any) => console.log(e))
     })
 
     return {
       article,
+      tags,
       updateTitleLoading,
+      updateTagsLoading,
       newArticleVersionLoading,
       updateLastVersionLoading,
       updateDraftLoading,
@@ -180,6 +202,24 @@ export default defineComponent({
         })
         .catch((e) => {
           this.updateTitleLoading = false
+        })
+    },
+    async updateTags(){
+      this.updateTagsLoading = true
+      const articleRef = this.$fire.firestore
+        .collection('articles')
+        .doc(this.article.uid)
+
+      await articleRef
+        .update({tags: this.tags.split(' ')})
+        .then(() => {
+          this.updateTagsLoading = false
+        })
+        .catch((e) => {
+          console.log(this.tags)
+          console.log(this.tags.split(' '))
+          console.log(e)
+          this.updateTagsLoading = false
         })
     },
     async newArticleVersion(){
@@ -350,7 +390,7 @@ section section section {
   margin: 12px 0;
   padding: 12px
 }
-input#title {
+input#title, input#tags {
   border: none;
   overflow: auto;
   outline: none;
@@ -361,8 +401,12 @@ input#title {
   width: auto;
 }
 
-input.input-text-title {
+input#title.input-text-title {
   font-size: 2em;
+}
+
+input#tags.input-text-title {
+  font-size: 1.175rem;
 }
 
 textarea {

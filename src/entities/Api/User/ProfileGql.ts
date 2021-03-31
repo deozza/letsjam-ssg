@@ -4,6 +4,7 @@ export default class ProfileGql {
   displayName: string
   email: string
   articles: Array<ArticleGql>
+  likedArticles: Array<ArticleGql>
 
   constructor(profileFromGraphql: object) {
     // @ts-ignore
@@ -11,8 +12,9 @@ export default class ProfileGql {
 
     // @ts-ignore
     this.email = 'displayName' in profileFromGraphql ? profileFromGraphql.email : ''
-    
+
     this.articles = []
+    this.likedArticles = []
 
     // @ts-ignore
     if(profileFromGraphql.articles !== undefined){
@@ -21,7 +23,12 @@ export default class ProfileGql {
         this.articles.push(new ArticleGql(article))
       }
     }
-
-
+    // @ts-ignore
+    if(profileFromGraphql.likedArticles !== undefined){
+      // @ts-ignore
+      for(let article of profileFromGraphql.likedArticles){
+        this.likedArticles.push(new ArticleGql(article))
+      }
+    }
   }
 }
