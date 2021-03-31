@@ -213,6 +213,10 @@ p.p-footer i.like-hover:hover{
   cursor: pointer;
 }
 
+div.article-content > iframe, div.article-content > p > img{
+  max-width: 100%;
+}
+
 p.p-footer i.fas.fa-heart{
   color: red;
 }
