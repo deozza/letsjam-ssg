@@ -282,11 +282,13 @@ html {
 .flex-left {
   -ms-flex-pack: distribute;
   justify-content: flex-start;
+  align-items: start;
 }
 
 .flex-right {
   -ms-flex-pack: distribute;
   justify-content: flex-end;
+  align-items: end;
 }
 
 .full-height {
