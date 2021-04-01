@@ -4,6 +4,7 @@ query articlesOfUserQuery($displayName: String!){
     dateOfLastUpdate,
     totalLikes,
     currentVersion{state},
-    tags
+    tags,
+    user{displayName}
   }
 }

@@ -56,7 +56,8 @@ export default defineComponent({
           },
         })
         .then((articlesFromGQL: any) => {
-          const publicArticles: Array<ArticleGql> = articlesFromGQL.data.articles
+          const publicArticles: Array<ArticleGql> = articlesFromGQL.data.articlesOfUser
+
           publicArticles.forEach((publicArticle: ArticleGql) => {
             if(publicArticle.currentVersion.state === ArticleVersionState.PUBLISHED){
               const articleCardInfo: ArticleCardInfo = new ArticleCardInfo(publicArticle)
