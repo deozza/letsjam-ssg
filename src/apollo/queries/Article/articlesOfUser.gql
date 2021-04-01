@@ -1,0 +1,9 @@
+query articlesOfUserQuery($displayName: String!){
+  articlesOfUser(displayName: $displayName){
+    title,
+    dateOfLastUpdate,
+    totalLikes,
+    currentVersion{state},
+    tags
+  }
+}
