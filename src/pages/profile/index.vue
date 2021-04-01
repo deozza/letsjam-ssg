@@ -5,7 +5,7 @@
       <section class="profile-info">
         <BaseHeader html-type="h3">{{profile.displayName}}</BaseHeader>
         <BaseParagraph visual-type="light">Email : {{profile.email}}</BaseParagraph>
-        <!--<BaseButton visual-type="primary" @buttonClicked="redirectToEditProfile()">Editer</BaseButton>-->
+        <BaseButton visual-type="primary" @buttonClicked="redirectToEditProfile()">Editer</BaseButton>
       </section>
       <section class="articles-posted">
         <BaseHeader html-type="h3">Mes articles</BaseHeader>
@@ -95,7 +95,7 @@ export default defineComponent({
     const profile = ref<Profile>({} as Profile)
     const articles = ref<ArticleCardInfoProfilePage[]>([])
     const likedArticlesInfo = ref<LikedArticleProfilePage[]>([])
-    const user: User = new User(context.$fire.auth.currentUser)
+    const user: User = context.store.getters['user/loggedUser']
     const userDisplayName: string = user.displayName
 
     useFetch(async () => {
