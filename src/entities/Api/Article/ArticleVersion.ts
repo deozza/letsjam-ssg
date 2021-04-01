@@ -32,7 +32,7 @@ export default class ArticleVersion {
     this.dateOfLastUpdate = 'dateOfLastUpdate' in articleVersion ? articleVersion.dateOfLastUpdate : Date.now()
 
     // @ts-ignore
-    this.versionNumber = 'versionNumber' in articleVersion ? articleVersion.versionNumber : null
+    this.versionNumber = 'versionNumber' in articleVersion ? articleVersion.versionNumber : 0
 
     // @ts-ignore
     this.content = 'content' in articleVersion ? articleVersion.content : ''

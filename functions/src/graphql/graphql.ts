@@ -64,6 +64,7 @@ const typeDefs = gql`
   type Query {
     tags: [Tag]
     articles: [Articles]
+    articlesOfUser(displayName: String!): [Articles]
     article(displayName: String!, title: String!, readerUid: String): Articles
     profile(displayName: String!): User
   }
@@ -158,8 +159,6 @@ const resolvers = {
       return {} as UserArticleLike;
     },
     async isLikedByReader(article:any, args: any) {
-      console.log(args);
-
       try {
         const userArticleLike = await fbApp.admin
             .firestore()
@@ -249,6 +248,35 @@ const resolvers = {
             .get();
 
         return articles.docs.map((article: any) => article.data()) as Article[];
+      } catch (e) {
+        throw new ApolloError(e);
+      }
+    },
+    async articlesOfUser(_: null, args:{displayName: string}) {
+      try {
+        const userQuery = await fbApp.admin
+            .firestore()
+            .collection("users")
+            .where("displayName", "==", args.displayName)
+            .get();
+
+        if (userQuery.docs.length === 0) {
+          return new ValidationError("Author not found.");
+        }
+        try {
+          const articleQuery = await fbApp.admin
+              .firestore()
+              .collection("articles")
+              .where("authorUid", "==", userQuery.docs[0].id)
+              .get();
+
+          if (articleQuery.docs.length <= 0) {
+            return new ValidationError("User not found.");
+          }
+          return articleQuery.docs.map((article: any) => article.data()) as Article[];
+        } catch (e) {
+          throw new ApolloError(e);
+        }
       } catch (e) {
         throw new ApolloError(e);
       }
