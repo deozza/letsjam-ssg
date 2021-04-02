@@ -47,7 +47,7 @@ import {
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
 import BaseCard from '~/components/Molecules/Card/BaseCard.vue'
-import articlesFilteredQuery from '~/apollo/queries/Article/articlesFiltered.gql'
+import articlesQuery from '~/apollo/queries/Article/articles.gql'
 import BaseCardLoading from '~/components/Molecules/Card/BaseCardLoading.vue'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
@@ -70,7 +70,7 @@ export default defineComponent({
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
         .query({
-          query: articlesFilteredQuery,
+          query: articlesQuery,
           prefetch: true,
         })
         .then((articlesFromGQL: any) => {

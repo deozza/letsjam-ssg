@@ -90,6 +90,7 @@ export default defineComponent({
     BaseButton,
     BaseLink
   },
+  middleware: 'authenticated',
   setup() {
     const context = useContext()
     const profile = ref<Profile>({} as Profile)

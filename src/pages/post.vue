@@ -136,6 +136,7 @@ export default defineComponent({
     BaseButton,
     BaseParagraph,
   },
+  middleware: 'authenticated',
   setup({ maxWidth }) {
     const context = useContext()
     const articleAuthor: User = context.store.state.user.authUser

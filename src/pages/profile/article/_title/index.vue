@@ -162,6 +162,7 @@ export default defineComponent({
     BaseButton,
     BaseArticleLoading
   },
+  middleware: 'authenticated',
   setup() {
     const context = useContext()
     const params = context.params.value
