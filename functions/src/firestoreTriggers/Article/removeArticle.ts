@@ -1,6 +1,6 @@
 import {functions, db} from "../initializeTriggers";
 
-exports.addTags = functions
+exports.cleanArticleData = functions
     .region("us-central1")
     .firestore
     .document("articles/{articlesUid}")
