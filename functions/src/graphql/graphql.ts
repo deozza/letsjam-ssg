@@ -63,7 +63,7 @@ const typeDefs = gql`
 
   type Query {
     tags: [Tag]
-    articles: [Articles]
+    articles(tags: [String]): [Articles]
     articlesOfUser(displayName: String!): [Articles]
     article(displayName: String!, title: String!, readerUid: String): Articles
     profile(displayName: String!): User
@@ -239,13 +239,23 @@ const resolvers = {
         throw new ApolloError(e);
       }
     },
-    async articles() {
+    async articles(_: null, args:{tags: Array<String>|null}) {
+      const articlesRef = fbApp.admin
+          .firestore()
+          .collection("articles");
+
       try {
-        const articles = await fbApp.admin
-            .firestore()
-            .collection("articles")
-            .orderBy("dateOfLastUpdate", "DESC")
-            .get();
+        let articles = null;
+        if (args.tags !== undefined && args.tags !== null && args.tags.length > 0) {
+          articles = await articlesRef
+              .where("tags", "array-contains-any", args.tags)
+              .orderBy("dateOfLastUpdate", "DESC")
+              .get();
+        } else {
+          articles = await articlesRef
+              .orderBy("dateOfLastUpdate", "DESC")
+              .get();
+        }
 
         return articles.docs.map((article: any) => article.data()) as Article[];
       } catch (e) {
