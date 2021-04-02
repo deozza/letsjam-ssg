@@ -87,7 +87,7 @@ export default defineComponent({
     }
 
     queryTags.forEach((tag) => {
-      tags.push(decodeURI(tag))
+      tags.push(decodeURI(tag.replace(' ', '-')))
       tagsInput += decodeURI(tag)+ ","
     })
 
@@ -138,17 +138,18 @@ export default defineComponent({
       let searchQuery = ''
 
       this.tagsInput.split(',').forEach((tag, index) => {
-        searchQuery += encodeURI(tag)
-        if(index !== this.tagsInput.split(',').length - 1){
+        if(tag !== ''){
+          searchQuery += encodeURI(tag.toLowerCase().replace(' ', '-'))
           searchQuery += '&'
-        }
 
-        if(!this.tags.includes(tag)){
-          this.tags.push(tag)
+          if(!this.tags.includes(tag)){
+            this.tags.push(tag)
+          }
+
         }
       })
 
-      await this.$router.push('/search/'+searchQuery)
+      await this.$router.push('/search/'+searchQuery.slice(0,-1))
 
     },
   }

@@ -96,13 +96,13 @@ export default defineComponent({
       let searchQuery = ''
 
       this.tagsInput.split(',').forEach((tag, index) => {
-        searchQuery += encodeURI(tag)
-        if(index !== this.tagsInput.split(',').length - 1){
+        if(tag !== ''){
+          searchQuery += encodeURI(tag.toLowerCase().replace(' ', '-'))
           searchQuery += '&'
         }
       })
 
-      await this.$router.push('/search/'+searchQuery)
+      await this.$router.push('/search/'+searchQuery.slice(0,-1))
     }
   }
 })

@@ -224,7 +224,7 @@ export default defineComponent({
     },
     async addTag(tagName: string){
       this.updateTagsLoading = true
-      this.article.tags.push(tagName)
+      this.article.tags.push(tagName.toLowerCase().replace(' ', '-'))
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -242,7 +242,7 @@ export default defineComponent({
     },
     async removeTag(tagName: string){
       this.updateTagsLoading = true
-      this.article.tags.splice(this.article.tags.indexOf(tagName), 1)
+      this.article.tags.splice(this.article.tags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
 
       const articleRef = this.$fire.firestore
         .collection('articles')

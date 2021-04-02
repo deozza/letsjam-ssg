@@ -193,19 +193,19 @@ export default defineComponent({
       if(tagName.length < 3){
         return
       }
-      this.articleTags.push(tagName)
+      this.articleTags.push(tagName.toLowerCase().replace(' ', '-'))
 
-      if(manual === false || this.tagsPresetLeft.includes(tagName) === true){
-        this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tagName), 1)
+      if(manual === false || this.tagsPresetLeft.includes(tagName.toLowerCase().replace(' ', '-')) === true){
+        this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
       }else{
         this.newTag = ''
       }
 
     },
     removeTag(tagName: string){
-      this.articleTags.splice(this.articleTags.indexOf(tagName), 1)
+      this.articleTags.splice(this.articleTags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
 
-      if(this.tagsPreset.includes(tagName) === true && this.tagsPresetLeft.includes(tagName) === false){
+      if(this.tagsPreset.includes(tagName) === true && this.tagsPresetLeft.includes(tagName.toLowerCase().replace(' ', '-')) === false){
         this.tagsPresetLeft.push(tagName)
       }
     },
