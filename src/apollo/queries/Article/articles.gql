@@ -1,4 +1,4 @@
-query articlesQuery($tags: [String] = []){
+query articlesQuery($tags: [String]){
   articles(tags: $tags){
     title,
     dateOfLastUpdate,

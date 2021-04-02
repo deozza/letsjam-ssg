@@ -47,7 +47,7 @@ import {
 import BaseHeader from '~/components/Atoms/Typography/Header/BaseHeader.vue'
 import ArticleCardInfo from '~/entities/Front/Article/Display/ArticleCardInfo'
 import BaseCard from '~/components/Molecules/Card/BaseCard.vue'
-import articlesQuery from '~/apollo/queries/Article/articles.gql'
+import articlesFilteredQuery from '~/apollo/queries/Article/articlesFiltered.gql'
 import BaseCardLoading from '~/components/Molecules/Card/BaseCardLoading.vue'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
@@ -67,11 +67,10 @@ export default defineComponent({
     const searchLoading: boolean = false
     const tagsInput: string = ''
 
-
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
         .query({
-          query: articlesQuery,
+          query: articlesFilteredQuery,
           prefetch: true,
         })
         .then((articlesFromGQL: any) => {
@@ -94,13 +93,16 @@ export default defineComponent({
   },
   methods: {
     async search(){
-      let searchQuery = '?'
+      let searchQuery = ''
 
-      this.tagsInput.split(',').forEach((tag) => {
-        searchQuery += 'tags='+tag+'&'
+      this.tagsInput.split(',').forEach((tag, index) => {
+        searchQuery += encodeURI(tag)
+        if(index !== this.tagsInput.split(',').length - 1){
+          searchQuery += '&'
+        }
       })
 
-      await this.$router.push('/search'+searchQuery)
+      await this.$router.push('/search/'+searchQuery)
     }
   }
 })

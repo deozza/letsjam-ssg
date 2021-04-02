@@ -1,6 +1,6 @@
 <template>
   <section>
-    <BaseHeader html-type="h2">Les derniers articles </BaseHeader>
+    <BaseHeader html-type="h2">Rechercher des articles sur <span class="tag" v-for="(tag, index) in tags" :key="index">{{tag}}</span> </BaseHeader>
     <div v-if="$fetchState.pending">
       <BaseCardLoading></BaseCardLoading>
       <BaseCardLoading></BaseCardLoading>
@@ -75,7 +75,7 @@ export default defineComponent({
   },
   setup() {
     const context = useContext()
-    let queryTags: Array<string> = context.query.value.tags as Array<string>
+    let queryTags: Array<string> = context.params.value.tags.split('&')
 
     const articles  = ref<ArticleCardInfo[]>([])
     const tags: Array<string> = []
@@ -100,11 +100,13 @@ export default defineComponent({
     )
 
     useFetch(async () => {
+
+      console.log(tags)
+
       await context.app.apolloProvider.defaultClient
         .query({
           query: articlesQuery,
-          prefetch: true,
-          arguments: {
+          variables: {
             tags: tags
           }
         })
@@ -116,6 +118,8 @@ export default defineComponent({
               articles.value.push(articleCardInfo)
             }
           })
+
+          console.log(articles)
         })
         .catch((e: any) => console.log(e))
     })
@@ -131,15 +135,20 @@ export default defineComponent({
   methods: {
     async search() {
 
-      let searchQuery = '?'
+      let searchQuery = ''
 
-      this.tagsInput.split(',').forEach((tag) => {
-        searchQuery += 'tags='+tag+'&'
+      this.tagsInput.split(',').forEach((tag, index) => {
+        searchQuery += encodeURI(tag)
+        if(index !== this.tagsInput.split(',').length - 1){
+          searchQuery += '&'
+        }
+
         if(!this.tags.includes(tag)){
           this.tags.push(tag)
         }
       })
-      await this.$router.push('/search'+searchQuery)
+
+      await this.$router.push('/search/'+searchQuery)
 
     },
   }
@@ -167,5 +176,19 @@ input#tag {
 
 input#tag.input-text-title {
   font-size: 1em;
+}
+
+span.tag{
+  background-color: var(--primary_bg);
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: normal;
 }
 </style>
