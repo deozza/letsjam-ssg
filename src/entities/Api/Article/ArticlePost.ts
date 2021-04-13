@@ -4,7 +4,6 @@ export default class ArticlePost {
   uid: string
   title: string
   authorUid: string
-  versions: Array<string>
   currentVersion: string
   tags: Array<string>
 
@@ -23,9 +22,6 @@ export default class ArticlePost {
 
     // @ts-ignore
     this.authorUid = 'authorUid' in article ? article.authorUid : ''
-
-    // @ts-ignore
-    this.versions = 'versions' in article ? article.versions : []
 
     // @ts-ignore
     this.currentVersion = 'currentVersion' in article ? article.currentVersion : ''

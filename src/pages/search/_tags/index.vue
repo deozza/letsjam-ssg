@@ -100,9 +100,6 @@ export default defineComponent({
     )
 
     useFetch(async () => {
-
-      console.log(tags)
-
       await context.app.apolloProvider.defaultClient
         .query({
           query: articlesQuery,
@@ -118,8 +115,6 @@ export default defineComponent({
               articles.value.push(articleCardInfo)
             }
           })
-
-          console.log(articles)
         })
         .catch((e: any) => console.log(e))
     })
@@ -150,7 +145,6 @@ export default defineComponent({
       })
 
       await this.$router.push('/search/'+searchQuery.slice(0,-1))
-
     },
   }
 })

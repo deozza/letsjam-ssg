@@ -9,16 +9,17 @@ exports.cleanArticleData = functions
 
       const versions = deletedValue.versions;
 
-      const author = db.doc("/users/"+deletedValue.authorUid).get();
-
-      const uniqueArticlePerUser = encodeURI(deletedValue.title)+encodeURI(author.data().displayName);
 
       try {
         versions.forEach((version: string) => {
-          db.doc("articleVersion/"+version).delete();
+          db.collection("articleVersion").doc(+version).delete();
         });
 
-        db.doc("uniqueArticlePerUser/"+uniqueArticlePerUser).delete();
+        const author = db.collection("users").doc(deletedValue.authorUid).get();
+
+        const uniqueArticlePerUser = encodeURI(deletedValue.title)+encodeURI(author.data().displayName);
+
+        db.collection("uniqueArticlePerUser").doc(uniqueArticlePerUser).delete();
       } catch (e) {
         console.log(e);
       }

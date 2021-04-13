@@ -26,8 +26,8 @@ const typeDefs = gql`
   type User {
     displayName: String!
     email: String!
-    articles: [Articles]!
-    likedArticles: [UserArticleLike]!
+    articles: [Articles]
+    likedArticles: [UserArticleLike]
   }
 
   type Articles {
@@ -116,8 +116,9 @@ const resolvers = {
       try {
         const articleVersion = await fbApp.admin
             .firestore()
-            .collection("articleVersion")
-            .where("articleUid", "==", article.uid)
+            .collection("articles")
+            .doc(article.uid)
+            .collection("versions")
             .get();
 
         return articleVersion.docs.map((version: any) => version.data()) as ArticleVersion[];
@@ -130,7 +131,7 @@ const resolvers = {
         try {
           const currentVersion = await fbApp.admin
               .firestore()
-              .doc(`articleVersion/${article.currentVersion}`)
+              .doc(`/articles/${article.uid}/versions/${article.currentVersion}`)
               .get();
 
           return currentVersion.data() as ArticleVersion;
@@ -204,7 +205,7 @@ const resolvers = {
       try {
         const articleVersion = await fbApp.admin
             .firestore()
-            .doc(`articleVersion/${userArticleLike.articleVersionUid}`)
+            .doc(`articles/${userArticleLike.articleUid}/versions/${userArticleLike.articleVersionUid}`)
             .get();
 
         return articleVersion.data() as ArticleVersion;
