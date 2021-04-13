@@ -153,6 +153,8 @@ import ArticlePageEdit from '~/entities/Front/Article/Display/ArticlePageEdit'
 import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion.ts'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import BaseArticleLoading from '~/components/Molecules/Article/BaseArticleLoading.vue'
+import VersionGql from '~/entities/Api/Article/VersionGql'
+import ArticleVersionPageEdit from '~/entities/Front/Article/Display/ArticleVersionPageEdit'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -162,6 +164,7 @@ export default defineComponent({
     BaseButton,
     BaseArticleLoading
   },
+  middleware: 'authenticated',
   setup() {
     const context = useContext()
     const params = context.params.value
@@ -189,6 +192,7 @@ export default defineComponent({
         .then((articleFromGQL: any) => {
           const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
           article.value = new ArticlePageEdit(articleGql)
+          console.log(article)
         })
         .catch((e: any) => console.log(e))
     })
@@ -224,7 +228,7 @@ export default defineComponent({
     },
     async addTag(tagName: string){
       this.updateTagsLoading = true
-      this.article.tags.push(tagName)
+      this.article.tags.push(tagName.toLowerCase().replace(' ', '-'))
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -242,7 +246,7 @@ export default defineComponent({
     },
     async removeTag(tagName: string){
       this.updateTagsLoading = true
-      this.article.tags.splice(this.article.tags.indexOf(tagName), 1)
+      this.article.tags.splice(this.article.tags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -269,12 +273,16 @@ export default defineComponent({
       articleVersion.state = ArticleVersionState.PRE_PUBLISHED
 
       const articleVersionRef = this.$fire.firestore
-        .collection('articleVersion')
+        .collection('articles')
+        .doc(this.article.uid)
+        .collection("versions")
         .doc(articleVersion.uid)
 
       await articleVersionRef
         .set(articleVersion.toJSON())
         .then(() => {
+
+          this.article.lastVersion = new ArticleVersionPageEdit(new VersionGql(articleVersion))
           this.newArticleVersionLoading = false
         })
         .catch((e) => {
@@ -285,15 +293,19 @@ export default defineComponent({
       this.updateLastVersionLoading = true
 
       const articleRef = this.$fire.firestore
-        .collection('articleVersion')
+        .collection('articles')
+        .doc(this.article.uid)
+        .collection("versions")
         .doc(this.article.lastVersion!.uid)
 
       await articleRef
         .update({content: this.article.lastVersion!.content, state: ArticleVersionState.PRE_PUBLISHED})
         .then(() => {
           this.updateLastVersionLoading = false
+
         })
         .catch((e) => {
+          console.log(e)
           this.updateLastVersionLoading = false
         })
     },
@@ -301,7 +313,9 @@ export default defineComponent({
       this.updateDraftLoading = true
 
       const articleRef = this.$fire.firestore
-        .collection('articleVersion')
+        .collection('articles')
+        .doc(this.article.uid)
+        .collection("versions")
         .doc(this.article.draftVersion!.uid)
 
       await articleRef
@@ -317,7 +331,9 @@ export default defineComponent({
       this.publishDraftLoading = true
 
       const articleRef = this.$fire.firestore
-        .collection('articleVersion')
+        .collection('articles')
+        .doc(this.article.uid)
+        .collection("versions")
         .doc(this.article.draftVersion!.uid)
 
       await articleRef

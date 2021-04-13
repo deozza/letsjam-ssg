@@ -47,18 +47,19 @@ export default class ArticlePageEdit {
 
     if(article.currentVersion.state === ArticleVersionState.PUBLISHED){
       this.allVersionsAreArchived = false
-      this.publishedVersion = new ArticleVersionPageEdit(article.versions[article.currentVersion.versionNumber])
+      const publishedVersionObject: VersionGql = article.versions.find(version => version.uid === article.currentVersion.uid) as VersionGql
+      this.publishedVersion = new ArticleVersionPageEdit(publishedVersionObject)
     }
 
     let lastVersionNumber = 0;
+    let lastVersion: VersionGql = article.versions[lastVersionNumber]
     for(const version of article.versions){
-      if(version.versionNumber > lastVersionNumber){
-        lastVersionNumber = version.versionNumber
+      if(version.versionNumber > lastVersion.versionNumber){
+        lastVersion = version
       }
     }
 
     this.lastVersion = null
-    const lastVersion = article.versions[lastVersionNumber]
     if(lastVersion.state !== ArticleVersionState.PUBLISHED){
       this.allVersionsAreArchived = false
       this.lastVersion = new ArticleVersionPageEdit(lastVersion)

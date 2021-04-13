@@ -136,6 +136,7 @@ export default defineComponent({
     BaseButton,
     BaseParagraph,
   },
+  middleware: 'authenticated',
   setup({ maxWidth }) {
     const context = useContext()
     const articleAuthor: User = context.store.state.user.authUser
@@ -193,25 +194,32 @@ export default defineComponent({
       if(tagName.length < 3){
         return
       }
-      this.articleTags.push(tagName)
+      this.articleTags.push(tagName.toLowerCase().replace(' ', '-'))
 
-      if(manual === false || this.tagsPresetLeft.includes(tagName) === true){
-        this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tagName), 1)
+      if(manual === false || this.tagsPresetLeft.includes(tagName.toLowerCase().replace(' ', '-')) === true){
+        this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
       }else{
         this.newTag = ''
       }
 
     },
     removeTag(tagName: string){
-      this.articleTags.splice(this.articleTags.indexOf(tagName), 1)
+      this.articleTags.splice(this.articleTags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
 
-      if(this.tagsPreset.includes(tagName) === true && this.tagsPresetLeft.includes(tagName) === false){
+      if(this.tagsPreset.includes(tagName) === true && this.tagsPresetLeft.includes(tagName.toLowerCase().replace(' ', '-')) === false){
         this.tagsPresetLeft.push(tagName)
       }
     },
     async post(isDraft: boolean) {
       this.postLoading = true
       this.error = ''
+
+      if(!isDraft && (this.articleTags.length < 1 || this.articleTags.length > 5)){
+        this.error = 'Vous devez préciser entre 1 et 5 catégories pour votre article.'
+        this.postLoading = false
+        return
+      }
+
       const user = this.$store.state.user.authUser
 
       const article: ArticlePost = new ArticlePost({
@@ -222,7 +230,6 @@ export default defineComponent({
 
       const articleVersion: ArticleVersion = new ArticleVersion({})
 
-      article.versions = [articleVersion.uid]
       article.currentVersion = articleVersion.uid
       articleVersion.content = this.articleContent
       articleVersion.articleUid = article.uid
@@ -231,9 +238,6 @@ export default defineComponent({
         articleVersion.state = ArticleVersionState.PRE_PUBLISHED
       }
 
-      const articleVersionRef = this.$fire.firestore
-        .collection('articleVersion')
-        .doc(articleVersion.uid)
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(article.uid)
@@ -241,31 +245,28 @@ export default defineComponent({
         .collection('uniqueArticlePerUser')
         .doc(encodeURI(article.title)+encodeURI(user.displayName))
 
-      await uniqueArticleRef
-        .set({articleUid: article.title, authorUid: article.authorUid})
+      await uniqueArticleRef.set({articleUid: article.uid, authorUid: article.authorUid})
+      .then(() => {
+        articleRef.set(article.toJSON())
         .then(() => {
-          articleRef
-            .set(article.toJSON())
-            .then(() => {
-              articleVersionRef.set(articleVersion.toJSON())
-            })
-            .then(() => {
-              this.postLoading = false
-              this.$router.push({
+          articleRef.collection('versions').doc(articleVersion.uid).set(articleVersion.toJSON())
+          .then(() => {
+            this.$router.push({
                 path: '/profile',
                 query: { success: 'true' },
               })
-            })
-            .catch(() => {
-              this.postLoading = false
-              this.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
-
-            })
-        })
-        .catch(() => {
+          }).catch(() => {
+             this.postLoading = false
+             this.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
+          })
+        }).catch(() => {
           this.postLoading = false
-          this.error = 'Vous avez déjà posté un article avec le même nom.'
+          this.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
         })
+      }).catch(() => {
+         this.postLoading = false
+         this.error = 'Vous avez déjà posté un article avec le même nom.'
+      })
     },
   },
 })
