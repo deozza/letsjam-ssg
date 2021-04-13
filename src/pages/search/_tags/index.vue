@@ -1,24 +1,6 @@
 <template>
   <section>
-    <section class="search">
-      <form @submit.prevent="search()">
-        <div class="flex-row flex-between">
-          <input
-            id="tag"
-            v-model="tagsInput"
-            type="text"
-            class="input-text-title"
-            required
-            placeholder="Rechercher un article (séparez les catégories par une virgule)"
-            name="Rechercher un article"
-            minlength="3"
-            maxlength="200"
-          />
-          <BaseButton html-type="submit" visual-type="primary"  :loading="searchLoading" icon="search" :only-icon="true"></BaseButton>
-        </div>
-      </form>
-    </section>
-    <BaseHeader html-type="h2">Les derniers articles</BaseHeader>
+    <BaseHeader html-type="h2">Rechercher des articles sur <span class="tag" v-for="(tag, index) in tags" :key="index">{{tag}}</span> </BaseHeader>
     <div v-if="$fetchState.pending">
       <BaseCardLoading></BaseCardLoading>
       <BaseCardLoading></BaseCardLoading>
@@ -27,12 +9,37 @@
 
     </div>
     <div v-else>
+      <section class="search">
+        <form @submit.prevent="search()">
+          <div class="flex-row flex-between">
+            <input
+              id="tag"
+              v-model="tagsInput"
+              type="text"
+              class="input-text-title"
+              required
+              placeholder="Rechercher un article (séparez les catégories par une virgule)"
+              name="Rechercher un article"
+              minlength="3"
+              maxlength="200"
+            />
+            <BaseButton html-type="submit" visual-type="primary" :loading="searchLoading" icon="search" :only-icon="true"></BaseButton>
+          </div>
+        </form>
+      </section>
+      <div v-if="articles.length > 0">
 
-      <BaseCard
-        v-for="(article, index) in articles"
-        :key="index"
-        :article="article"
-      />
+        <BaseCard
+          v-for="(article, index) in articles"
+          :key="index"
+          :article="article"
+        />
+      </div>
+      <div class="flex-column" v-else>
+        <BaseParagraph>Aucun article n'a encore été écrit dans cette catégorie...</BaseParagraph>
+        <BaseLink :link="postLink">{{postLink.title}}</BaseLink>
+      </div>
+
     </div>
   </section>
 </template>
@@ -52,26 +59,53 @@ import BaseCardLoading from '~/components/Molecules/Card/BaseCardLoading.vue'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
+import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
+import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
+import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 
 export default defineComponent({
-  name: 'IndexPage',
+  name: 'SearchPage',
   components: {
     BaseHeader,
     BaseCard,
     BaseCardLoading,
-    BaseButton
+    BaseButton,
+    BaseParagraph,
+    BaseLink
   },
   setup() {
     const context = useContext()
+    let queryTags: Array<string> = context.params.value.tags.split('&')
+
     const articles  = ref<ArticleCardInfo[]>([])
+    const tags: Array<string> = []
+    let tagsInput: string = ''
     const searchLoading: boolean = false
-    const tagsInput: string = ''
+
+    if(!Array.isArray(queryTags)){
+      queryTags = [queryTags]
+    }
+
+    queryTags.forEach((tag) => {
+      tags.push(decodeURI(tag.replace(' ', '-')))
+      tagsInput += decodeURI(tag)+ ","
+    })
+
+    const postLink: BaseLinkModele = new BaseLinkModele(
+      ['post'],
+      'En créer un ?',
+      true,
+      '',
+      ['btn', 'btn-primary', 'btn-outline'],
+    )
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
         .query({
           query: articlesQuery,
-          prefetch: true,
+          variables: {
+            tags: tags
+          }
         })
         .then((articlesFromGQL: any) => {
           const publicArticles: Array<ArticleGql> = articlesFromGQL.data.articles
@@ -88,27 +122,36 @@ export default defineComponent({
     return {
       articles,
       tagsInput,
+      tags,
+      postLink,
       searchLoading
     }
   },
   methods: {
-    async search(){
+    async search() {
+
       let searchQuery = ''
 
       this.tagsInput.split(',').forEach((tag, index) => {
         if(tag !== ''){
           searchQuery += encodeURI(tag.toLowerCase().replace(' ', '-'))
           searchQuery += '&'
+
+          if(!this.tags.includes(tag)){
+            this.tags.push(tag)
+          }
+
         }
       })
 
       await this.$router.push('/search/'+searchQuery.slice(0,-1))
-    }
+    },
   }
 })
 </script>
 
-<style>
+<style scoped>
+
 section.search {
   background-color: white;
   margin: 12px 0 48px 0;
@@ -128,5 +171,19 @@ input#tag {
 
 input#tag.input-text-title {
   font-size: 1em;
+}
+
+span.tag{
+  background-color: var(--primary_bg);
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: normal;
 }
 </style>

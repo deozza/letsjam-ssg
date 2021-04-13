@@ -19,7 +19,8 @@
     "copy": "npm run copy:nuxt && npm run copy:static",
     "build:firebase": "npm run clean && npm run build && npm run copy && cd ../functions && npm i",
     "start:firebase": "firebase serve --only functions,hosting",
-    "deploy": "firebase deploy --only functions,hosting"
+    "deploy": "firebase deploy --only functions,hosting",
+    "deploy:website": "firebase deploy --only functions:nuxtssr-index,hosting"
   },
   "dependencies": {
     "@nuxt/typescript-runtime": "^2.0.1",

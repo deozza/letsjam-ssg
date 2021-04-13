@@ -57,6 +57,7 @@ export default defineComponent({
     BaseButton,
     BaseParagraph
   },
+  middleware: 'authenticated',
   setup() {
     const context = useContext()
     const user: User = context.store.getters['user/loggedUser']
