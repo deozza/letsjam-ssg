@@ -13,7 +13,7 @@
       theme="dark"
     />
     <div class="content">
-      <div class="horizontal-menu-content">
+      <div class="full-width-content">
         <Nuxt />
       </div>
     </div>
@@ -32,7 +32,7 @@ import HorizontalNavbar from '~/components/Molecules/Menu/HorizontalNavbar.vue'
 import BaseFooter from '~/components/Molecules/Footer/BaseFooter.vue'
 
 export default defineComponent({
-  name: 'DefaultLayoutVue',
+  name: 'FullWidthLayoutVue',
   components: {
     HorizontalNavbar,
     BaseFooter,
@@ -103,5 +103,9 @@ export default defineComponent({
 <style scoped>
 div div.content {
   min-height: calc(100vh - 72px);
+}
+
+div > div.content > div.full-width-content{
+  padding-top: 84px;
 }
 </style>

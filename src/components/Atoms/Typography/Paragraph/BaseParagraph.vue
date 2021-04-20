@@ -62,4 +62,8 @@ p.p-warning {
 p.p-info {
   color: var(--info_text);
 }
+
+p.p-center{
+  text-align: center;
+}
 </style>

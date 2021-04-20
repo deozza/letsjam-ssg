@@ -60,6 +60,7 @@ import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import BaseAlertModele from '~/components/Atoms/Alert/BaseAlertModele'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
+import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 
 export default defineComponent({
   name: 'LoginPage',
@@ -67,6 +68,7 @@ export default defineComponent({
     BaseHeader,
     BaseButton,
     BaseParagraph,
+    BaseLink
   },
   setup() {
     const email: string = ''
