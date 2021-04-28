@@ -6,7 +6,7 @@
   >
     <div class="card-header">
       <BaseLink itemprop="author" :link="article.authorLink">{{
-        article.authorDisplayName
+        article.authorLink.title
       }}</BaseLink>
       <BaseParagraph itemprop="datePublished">{{
         article.dateOfLastUpdateComputed

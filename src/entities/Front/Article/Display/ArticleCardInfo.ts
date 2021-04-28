@@ -34,7 +34,7 @@ export default class ArticleCardInfo {
     )
     this.authorLink = new BaseLinkModele(
       ['user', this.authorDisplayName],
-      this.title,
+      'De ' + this.authorDisplayName,
       true
     )
 
