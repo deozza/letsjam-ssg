@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <article>
     <div v-if="$fetchState.pending">
       <BaseArticleLoading></BaseArticleLoading>
     </div>
@@ -13,6 +13,9 @@
         article.title
       }}</BaseHeader>
       <div class="article-header">
+        <BaseParagraph visual-type="light" class="article-tags">
+          <BaseLink v-for="(tag, index) in article.tags" :key="index" :link="tag">{{tag.title}}</BaseLink>
+        </BaseParagraph>
         <BaseLink itemprop="author" :link="article.authorLink">{{
           article.authorDisplayName
         }}</BaseLink>
@@ -43,7 +46,7 @@
         </div>
       </div>
     </div>
-  </section>
+  </article>
 </template>
 
 <script lang="ts">
@@ -170,9 +173,18 @@ div.article-viewer.border {
   border: 1px solid var(--secondary_bg_hover);
 }
 
-div.article-viewer > div.article-header > a {
+div.article-viewer > div.article-header > a,
+div.article-viewer > div.article-header > p.article-tags > a.tag-link {
   text-decoration: none;
   color: black;
+}
+
+div.article-viewer > div.article-header > p.article-tags {
+  margin-bottom: 12px;
+}
+
+div.article-viewer > div.article-header > p.article-tags > a.tag-link{
+  margin-right: 12px;
 }
 
 div.article-header div p.p-footer {

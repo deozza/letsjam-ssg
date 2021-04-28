@@ -8,7 +8,7 @@ export default class ArticleCardInfo {
   totalLikes: number
   articleLink: BaseLinkModele
   authorLink: BaseLinkModele
-  tags: Array<string>
+  tags: Array<BaseLinkModele>
 
   constructor(articleGql: ArticleGql) {
     // @ts-ignore
@@ -34,7 +34,12 @@ export default class ArticleCardInfo {
       true
     )
 
-    this.tags = articleGql.tags
+    this.tags = []
+
+    articleGql.tags.forEach((tag:string) => {
+      const searchLinkForTag: BaseLinkModele = new BaseLinkModele(['search', tag], '#'+tag, true, '', ['tag-link'])
+      this.tags.push(searchLinkForTag)
+    })
   }
 
   toJSON(): any {
