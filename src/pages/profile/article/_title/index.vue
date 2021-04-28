@@ -18,7 +18,7 @@
             minlength="10"
             maxlength="200"
           />
-          <BaseButton v-if="!article.allVersionsAreArchived" html-type="submit" visual-type="success" @buttonClicked="updateTitle()" :loading="updateTitleLoading">Editer le titre</BaseButton>
+          <BaseButton v-if="!article.allVersionsAreArchived" html-type="submit" visual-type="success" @buttonClicked="updateTitle()" :loading="state.updateTitleLoading">Editer le titre</BaseButton>
         </div>
       </section>
 
@@ -51,6 +51,7 @@
           <BaseButton
             html-type="button"
             visual-type="primary"
+            :disabled="state.maxTagsLengthReached"
             icon="plus"
             @buttonClicked="addTag(newTag, true)"
           >Ajouter</BaseButton
@@ -65,7 +66,7 @@
           name="editor"
           placeholder="Ecrire ici votre article"
         ></textarea>
-        <BaseButton v-if="article.lastVersion === null" visual-type="success" @buttonClicked="newArticleVersion()" :loading="newArticleVersionLoading">Modifier l'article</BaseButton>
+        <BaseButton v-if="article.lastVersion === null" visual-type="success" @buttonClicked="newArticleVersion()" :loading="state.newArticleVersionLoading">Modifier l'article</BaseButton>
       </section>
 
       <section class="lastVersion" v-if="article.lastVersion !== null">
@@ -78,7 +79,7 @@
             name="editor"
             placeholder="Ecrire ici votre article"
           ></textarea>
-          <BaseButton visual-type="success" @buttonClicked="updateLastVersion()" :loading="updateLastVersionLoading">Corriger l'article</BaseButton>
+          <BaseButton visual-type="success" @buttonClicked="updateLastVersion()" :loading="state.updateLastVersionLoading">Corriger l'article</BaseButton>
         </div>
 
         <div
@@ -97,8 +98,8 @@
           placeholder="Ecrire ici votre article"
         ></textarea>
         <div class="flex-row flex-around">
-          <BaseButton visual-type="warning" @buttonClicked="updateDraft()" :loading="updateDraftLoading">Modifier le brouillon</BaseButton>
-          <BaseButton visual-type="success" @buttonClicked="publishDraft()" :loading="publishDraftLoading">Mettre en ligne l'article</BaseButton>
+          <BaseButton visual-type="warning" @buttonClicked="updateDraft()" :loading="state.updateDraftLoading">Modifier le brouillon</BaseButton>
+          <BaseButton visual-type="success" @buttonClicked="publishDraft()" :loading="state.publishDraftLoading">Mettre en ligne l'article</BaseButton>
         </div>
       </section>
 
@@ -136,8 +137,8 @@
         <BaseHeader html-type="h3">Archiver ou supprimer mon article</BaseHeader>
         <BaseParagraph>Votre article n'est plus à votre goût ? Pour ne plus qu'il soit visible par les autres membres, vous pouvez l'archiver. Vous pourrez ainsi conserver toutes ses statistiques, comme les likes et le nombre de vues. Vous pouvez également le supprimer. Il sera alors entièrement effacé</BaseParagraph>
         <BaseParagraph visual-type="danger">Attention ! Ces actions sont irréversibles !</BaseParagraph>
-        <BaseButton v-if="!article.allVersionsAreArchived" visual-type="warning" icon="fas fa-lock" :loading="archiveArticleLoading" @buttonClicked="archiveArticle()">Archiver</BaseButton>
-        <BaseButton visual-type="danger" icon="fas fa-trash-alt" :loading="deleteArticleLoading" @buttonClicked="deleteArticle()">Supprimer</BaseButton>
+        <BaseButton v-if="!article.allVersionsAreArchived" visual-type="warning" icon="fas fa-lock" :loading="state.archiveArticleLoading" @buttonClicked="archiveArticle()">Archiver</BaseButton>
+        <BaseButton visual-type="danger" icon="fas fa-trash-alt" :loading="state.deleteArticleLoading" @buttonClicked="deleteArticle()">Supprimer</BaseButton>
       </section>
     </section>
   </section>
@@ -150,7 +151,7 @@ import articleEditQuery from '~/apollo/queries/Article/articleEdit.gql'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import ArticlePageEdit from '~/entities/Front/Article/Display/ArticlePageEdit'
-import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion.ts'
+import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import BaseArticleLoading from '~/components/Molecules/Article/BaseArticleLoading.vue'
 import VersionGql from '~/entities/Api/Article/VersionGql'
@@ -170,14 +171,18 @@ export default defineComponent({
     const params = context.params.value
     const article = ref<ArticlePageEdit>({} as ArticlePageEdit)
     const newTag: string = ''
-    const updateTitleLoading: boolean = false
-    const updateTagsLoading: boolean = false
-    const newArticleVersionLoading: boolean = false
-    const updateLastVersionLoading: boolean = false
-    const updateDraftLoading: boolean = false
-    const publishDraftLoading: boolean = false
-    const archiveArticleLoading: boolean = false
-    const deleteArticleLoading: boolean = false
+
+    const state = {
+      updateTitleLoading: false,
+      updateTagsLoading: false,
+      newArticleVersionLoading: false,
+      updateLastVersionLoading: false,
+      updateDraftLoading: false,
+      publishDraftLoading: false,
+      archiveArticleLoading: false,
+      deleteArticleLoading: false,
+      maxTagsLengthReached: false
+    }
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -200,19 +205,12 @@ export default defineComponent({
     return {
       article,
       newTag,
-      updateTitleLoading,
-      updateTagsLoading,
-      newArticleVersionLoading,
-      updateLastVersionLoading,
-      updateDraftLoading,
-      publishDraftLoading,
-      archiveArticleLoading,
-      deleteArticleLoading
+      state
     }
   },
   methods: {
     async updateTitle(){
-      this.updateTitleLoading = true
+      this.state.updateTitleLoading = true
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(this.article.uid)
@@ -220,14 +218,20 @@ export default defineComponent({
       await articleRef
         .update({title: this.article.title})
         .then(() => {
-          this.updateTitleLoading = false
+          this.state.updateTitleLoading = false
         })
         .catch((e) => {
-          this.updateTitleLoading = false
+          this.state.updateTitleLoading = false
         })
     },
     async addTag(tagName: string){
-      this.updateTagsLoading = true
+      this.state.updateTagsLoading = true
+
+      if(this.article.tags.length >= 5 || this.state.maxTagsLengthReached){
+        this.state.maxTagsLengthReached = true
+        return
+      }
+
       this.article.tags.push(tagName.toLowerCase().replace(' ', '-'))
 
       const articleRef = this.$fire.firestore
@@ -237,15 +241,16 @@ export default defineComponent({
       await articleRef
         .update({tags: this.article.tags})
         .then(() => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
           this.newTag = ''
+          this.state.maxTagsLengthReached = this.article.tags.length >= 5
         })
         .catch((e) => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
         })
     },
     async removeTag(tagName: string){
-      this.updateTagsLoading = true
+      this.state.updateTagsLoading = true
       this.article.tags.splice(this.article.tags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
 
       const articleRef = this.$fire.firestore
@@ -255,16 +260,16 @@ export default defineComponent({
       await articleRef
         .update({tags: this.article.tags})
         .then(() => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
           this.newTag = ''
 
         })
         .catch((e) => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
         })
     },
     async newArticleVersion(){
-      this.newArticleVersionLoading = true
+      this.state.newArticleVersionLoading = true
 
       const articleVersion: ArticleVersion = new ArticleVersion({})
       articleVersion.content = this.article.publishedVersion!.content
@@ -283,14 +288,14 @@ export default defineComponent({
         .then(() => {
 
           this.article.lastVersion = new ArticleVersionPageEdit(new VersionGql(articleVersion))
-          this.newArticleVersionLoading = false
+          this.state.newArticleVersionLoading = false
         })
         .catch((e) => {
-          this.newArticleVersionLoading = false
+          this.state.newArticleVersionLoading = false
         })
     },
     async updateLastVersion(){
-      this.updateLastVersionLoading = true
+      this.state.updateLastVersionLoading = true
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -301,16 +306,16 @@ export default defineComponent({
       await articleRef
         .update({content: this.article.lastVersion!.content, state: ArticleVersionState.PRE_PUBLISHED})
         .then(() => {
-          this.updateLastVersionLoading = false
+          this.state.updateLastVersionLoading = false
 
         })
         .catch((e) => {
           console.log(e)
-          this.updateLastVersionLoading = false
+          this.state.updateLastVersionLoading = false
         })
     },
     async updateDraft(){
-      this.updateDraftLoading = true
+      this.state.updateDraftLoading = true
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -321,14 +326,14 @@ export default defineComponent({
       await articleRef
         .update({content: this.article.draftVersion!.content})
         .then(() => {
-          this.updateDraftLoading = false
+          this.state.updateDraftLoading = false
         })
         .catch((e) => {
-          this.updateDraftLoading = false
+          this.state.updateDraftLoading = false
         })
     },
     async publishDraft(){
-      this.publishDraftLoading = true
+      this.state.publishDraftLoading = true
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -339,14 +344,14 @@ export default defineComponent({
       await articleRef
         .update({content: this.article.draftVersion!.content, state: ArticleVersionState.PRE_PUBLISHED})
         .then(() => {
-          this.publishDraftLoading = false
+          this.state.publishDraftLoading = false
         })
         .catch((e) => {
-          this.publishDraftLoading = false
+          this.state.publishDraftLoading = false
         })
     },
     async archiveArticle(){
-      this.archiveArticleLoading = true
+      this.state.archiveArticleLoading = true
 
       let uids = []
 
@@ -374,17 +379,17 @@ export default defineComponent({
         articleVersionRef
           .update({content: '', state: ArticleVersionState.ARCHIVED})
           .then(() => {
-            this.archiveArticleLoading = false
+            this.state.archiveArticleLoading = false
           })
           .catch((e) => {
             console.log(e)
-            this.archiveArticleLoading = false
+            this.state.archiveArticleLoading = false
           })
       })
 
     },
     async deleteArticle(){
-      this.deleteArticleLoading = true
+      this.state.deleteArticleLoading = true
 
       let uids = []
 
@@ -413,7 +418,7 @@ export default defineComponent({
           .delete()
           .catch((e) => {
             console.log(e)
-            this.archiveArticleLoading = false
+            this.state.deleteArticleLoading = false
           })
       })
 
@@ -424,13 +429,13 @@ export default defineComponent({
       await articleRef
         .delete()
         .then(() => {
-          this.archiveArticleLoading = false
+          this.state.deleteArticleLoading = false
           this.$router.push('/profile')
 
         })
         .catch((e) => {
           console.log(e)
-          this.archiveArticleLoading = false
+          this.state.deleteArticleLoading = false
         })
     }
   }
