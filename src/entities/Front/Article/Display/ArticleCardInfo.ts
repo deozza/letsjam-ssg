@@ -4,6 +4,7 @@ import ArticleGql from '~/entities/Api/Article/ArticleGql'
 export default class ArticleCardInfo {
   title: string
   dateOfLastUpdate: number
+  dateOfLastUpdateComputed: string
   authorDisplayName: string
   totalLikes: number
   articleLink: BaseLinkModele
@@ -16,6 +17,9 @@ export default class ArticleCardInfo {
 
     // @ts-ignore
     this.dateOfLastUpdate = articleGql.dateOfLastUpdate
+
+    const timestampAsNumber: number = +articleGql.dateOfLastUpdate
+    this.dateOfLastUpdateComputed = 'Le ' + new Date(timestampAsNumber).toLocaleTimeString(['FR-fr'], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})
 
     // @ts-ignore
     this.authorDisplayName = articleGql.user.displayName

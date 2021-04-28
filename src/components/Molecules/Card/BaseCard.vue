@@ -9,7 +9,7 @@
         article.authorDisplayName
       }}</BaseLink>
       <BaseParagraph itemprop="datePublished">{{
-        getDateFromTimestamp(article.dateOfLastUpdate)
+        article.dateOfLastUpdateComputed
       }}</BaseParagraph>
     </div>
     <div class="card-content">
@@ -56,10 +56,6 @@ export default defineComponent({
   methods: {
     redirectToArticle() {
       this.$router.push(this.article.articleLink.link)
-    },
-    getDateFromTimestamp(timestamp: string) {
-      const timestampAsNumber: number = +timestamp
-      return new Date(timestampAsNumber).toLocaleString()
     },
   },
 })

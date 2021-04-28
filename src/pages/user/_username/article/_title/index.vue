@@ -20,8 +20,7 @@
           article.authorDisplayName
         }}</BaseLink>
         <BaseParagraph itemprop="datePublished"
-          >Le
-          {{ getDateFromTimestamp(article.dateOfLastUpdate) }}</BaseParagraph
+          >{{article.dateOfLastUpdateComputed}}</BaseParagraph
         >
       </div>
       <div
@@ -109,10 +108,6 @@ export default defineComponent({
     }
   },
   methods: {
-    getDateFromTimestamp(timestamp: string) {
-      const timestampAsNumber: number = +timestamp
-      return new Date(timestampAsNumber).toLocaleString()
-    },
     async likeArticle(){
       if(!this.isLoggedIn){
         return
