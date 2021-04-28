@@ -73,6 +73,7 @@
         <BaseButton
           html-type="button"
           visual-type="primary"
+          :disabled="state.maxTagsLengthReached"
           icon="plus"
           @buttonClicked="addTag(newTag, true)"
         >Ajouter</BaseButton
@@ -84,6 +85,7 @@
           <BaseButton
             v-for="(tag, index) of tagsPresetLeft" :key="index"
             visual-type="primary"
+            :disabled="state.maxTagsLengthReached"
             :outline="true"
             icon="plus"
             @buttonClicked="addTag(tag)"
@@ -99,7 +101,7 @@
       <BaseButton
         html-type="button"
         visual-type="success"
-        :loading="postLoading"
+        :loading="state.postLoading"
         icon="check"
         @buttonClicked="post(false)"
       >Poster</BaseButton
@@ -107,13 +109,13 @@
       <BaseButton
         html-type="button"
         visual-type="primary"
-        :loading="postLoading"
+        :loading="state.postLoading"
         icon="save"
         @buttonClicked="post(true)"
       >Sauvegarder le brouillon</BaseButton
       >
     </div>
-    <BaseParagraph visual-type="danger" v-if="error !== ''">{{error}}</BaseParagraph>
+    <BaseParagraph visual-type="danger" v-if="state.error !== ''">{{state.error}}</BaseParagraph>
   </section>
 </template>
 
@@ -146,7 +148,12 @@ export default defineComponent({
     const articleContent: string = ''
     const newTag: string = ''
     const articleTitle: string = ''
-    const error: string = ''
+
+    const state = {
+      error: '',
+      postLoading: false,
+      maxTagsLengthReached: false
+    }
 
     const alert: BaseAlertModele = new BaseAlertModele('', '')
 
@@ -182,11 +189,10 @@ export default defineComponent({
       articleTags,
       authorLink,
       alert,
-      postLoading,
-      error,
       cssVars,
       tagsPreset,
-      tagsPresetLeft
+      tagsPresetLeft,
+      state
     }
   },
   methods: {
@@ -194,6 +200,12 @@ export default defineComponent({
       if(tagName.length < 3){
         return
       }
+
+      if(this.articleTags.length >= 5 || this.state.maxTagsLengthReached){
+        this.state.maxTagsLengthReached = true
+        return
+      }
+
       this.articleTags.push(tagName.toLowerCase().replace(' ', '-'))
 
       if(manual === false || this.tagsPresetLeft.includes(tagName.toLowerCase().replace(' ', '-')) === true){
@@ -201,6 +213,8 @@ export default defineComponent({
       }else{
         this.newTag = ''
       }
+
+      this.state.maxTagsLengthReached = this.articleTags.length >= 5
 
     },
     removeTag(tagName: string){
@@ -211,12 +225,12 @@ export default defineComponent({
       }
     },
     async post(isDraft: boolean) {
-      this.postLoading = true
-      this.error = ''
+      this.state.postLoading = true
+      this.state.error = ''
 
       if(!isDraft && (this.articleTags.length < 1 || this.articleTags.length > 5)){
-        this.error = 'Vous devez préciser entre 1 et 5 catégories pour votre article.'
-        this.postLoading = false
+        this.state.error = 'Vous devez préciser entre 1 et 5 catégories pour votre article.'
+        this.state.postLoading = false
         return
       }
 
@@ -256,16 +270,16 @@ export default defineComponent({
                 query: { success: 'true' },
               })
           }).catch(() => {
-             this.postLoading = false
-             this.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
+             this.state.postLoading = false
+             this.state.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
           })
         }).catch(() => {
-          this.postLoading = false
-          this.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
+          this.state.postLoading = false
+          this.state.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
         })
       }).catch(() => {
-         this.postLoading = false
-         this.error = 'Vous avez déjà posté un article avec le même nom.'
+         this.state.postLoading = false
+         this.state.error = 'Vous avez déjà posté un article avec le même nom.'
       })
     },
   },

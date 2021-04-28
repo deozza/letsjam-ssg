@@ -6,7 +6,7 @@ export default class ArticlePage {
   dateOfLastUpdate: number
   authorDisplayName: string
   totalLikes: number
-  tags: Array<string>
+  tags: Array<BaseLinkModele>
   content: string
   authorLink: BaseLinkModele
   isLikedByReader: boolean
@@ -25,7 +25,12 @@ export default class ArticlePage {
     this.totalLikes = article.totalLikes
 
     // @ts-ignore
-    this.tags = article.tags
+    this.tags = []
+
+    article.tags.forEach((tag:string) => {
+      const searchLinkForTag: BaseLinkModele = new BaseLinkModele(['search', tag], '#'+tag, true, '', ['tag-link'])
+      this.tags.push(searchLinkForTag)
+    })
 
     // @ts-ignore
     this.content = article.currentVersion.content
