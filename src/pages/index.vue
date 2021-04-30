@@ -14,7 +14,7 @@
             minlength="3"
             maxlength="200"
           />
-          <BaseButton html-type="submit" visual-type="primary"  :loading="searchLoading" icon="search" :only-icon="true"></BaseButton>
+          <BaseButton html-type="submit" visual-type="primary" :loading="searchLoading" icon="fas fa-search" :only-icon="true"></BaseButton>
         </div>
       </form>
     </section>
@@ -66,6 +66,8 @@ export default defineComponent({
     const articles  = ref<ArticleCardInfo[]>([])
     const searchLoading: boolean = false
     const tagsInput: string = ''
+
+    console.log(context.$fire.auth.currentUser)
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient

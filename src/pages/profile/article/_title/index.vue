@@ -44,7 +44,7 @@
             html-type="button"
             visual-type="primary"
             :disabled="state.maxTagsLengthReached"
-            icon="plus"
+            icon="fas fa-plus"
             @buttonClicked="addTag(newTag, true)"
           >Ajouter</BaseButton
           >

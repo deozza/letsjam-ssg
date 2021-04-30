@@ -99,6 +99,8 @@ export default defineComponent({
     const user: User = context.store.getters['user/loggedUser']
     const userDisplayName: string = user.displayName
 
+    console.log(userDisplayName)
+
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
         .query({

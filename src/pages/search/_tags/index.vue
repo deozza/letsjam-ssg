@@ -23,7 +23,7 @@
               minlength="3"
               maxlength="200"
             />
-            <BaseButton html-type="submit" visual-type="primary" :loading="searchLoading" icon="search" :only-icon="true"></BaseButton>
+            <BaseButton html-type="submit" visual-type="primary" :loading="searchLoading" icon="fas fa-search" :only-icon="true"></BaseButton>
           </div>
         </form>
       </section>

@@ -13,12 +13,26 @@
       </ul>
 
       <div class="flex-column">
-        <BaseButton
-          html-type="submit"
-          visual-type="success"
-          :loading="loginLoading"
+        <div class="flex-row flex-between" style="width: 50%">
+          <BaseButton
+            html-type="submit"
+            visual-type="success"
+            :loading="loginLoading"
           >Continuer</BaseButton
-        >
+          >
+          <BaseParagraph>Ou</BaseParagraph>
+          <BaseButton
+            html-type="button"
+            :loading="loginLoading"
+            :outline="true"
+            visual-type="secondary"
+            icon="fab fa-google"
+            v-on:buttonClicked="googleSignin()"
+          >
+            Se connecter avec Google
+          </BaseButton>
+        </div>
+
         <BaseLink :link="linkToSignin">{{linkToSignin.title}}</BaseLink>
       </div>
     </form>
@@ -35,6 +49,9 @@ import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import BaseInput from '~/components/Atoms/Input/BaseInput.vue'
 import BaseInputModele from '~/components/Atoms/Input/BaseInputModele'
+
+import firebase from 'firebase'
+import User from '~/entities/Api/User/User'
 
 export default defineComponent({
   name: 'LoginPage',
@@ -80,6 +97,53 @@ export default defineComponent({
 
       this.loginLoading = false
     },
+    async googleSignin(){
+      this.loginLoading = true
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      await this.$fire.auth.signInWithPopup(provider).then(result => {
+          this.$fire.firestore
+            .collection('users')
+            .where('email', '==', result.user?.email)
+            .get()
+            .then(userExist => {
+              if(userExist.docs.length > 0 ){
+                if(userExist.docs[0].data().displayName !== result.user?.displayName){
+                  const userRef = this.$fire.firestore
+                    .collection('users')
+                    .doc(userExist.docs[0].data().uid)
+
+                  userRef.update({displayName: result.user?.displayName})
+
+                  this.$fire.auth.currentUser?.updateProfile({displayName: result.user?.displayName})
+
+                }
+              }else{
+                const user: User = new User({
+                  uid: result.user?.uid,
+                  displayName: result.user?.displayName,
+                  email: result.user?.email,
+                  active: true
+                })
+                this.$fire.firestore.collection('users').doc(result.user?.uid).set(user.toJSON())
+              }
+            })
+            .catch(e => {
+              console.log('error')
+              console.log(e)
+            })
+
+        this.$router.push('/')
+      }).catch(e => {
+        this.alert.message =
+          'Impossible de se connecter. Les identifiants sont invalides'
+
+        console.log(e)
+      })
+      this.loginLoading = false
+
+    }
   },
 })
 </script>

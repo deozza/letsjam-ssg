@@ -69,7 +69,7 @@
             html-type="button"
             visual-type="primary"
             :disabled="state.maxTagsLengthReached"
-            icon="plus"
+            icon="fas fa-plus"
             v-on:buttonClicked="addManualTag(newTag)"
           >Ajouter</BaseButton
           >
@@ -88,7 +88,7 @@
         html-type="button"
         visual-type="success"
         :loading="state.postLoading"
-        icon="check"
+        icon="fas fa-check"
         @buttonClicked="post(false)"
       >Poster</BaseButton
       >
@@ -96,7 +96,7 @@
         html-type="button"
         visual-type="primary"
         :loading="state.postLoading"
-        icon="save"
+        icon="fas fa-save"
         @buttonClicked="post(true)"
       >Sauvegarder le brouillon</BaseButton
       >
