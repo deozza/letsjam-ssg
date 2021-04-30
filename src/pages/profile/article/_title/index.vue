@@ -251,14 +251,14 @@ export default defineComponent({
           this.state.updateTitleLoading = false
         })
     },
-    addManualTag(tagName: string){
+    async addManualTag(tagName: string){
       if(tagName.length < 3){
         return
       }
       const tag: BaseTagModele = new BaseTagModele(tagName, false, true)
 
-      this.addTag(tag)
-
+      await this.addTag(tag)
+      await this.$fire.firestore.doc("tags/"+encodeURI(tagName)).set({name: tagName});
     },
     async addTag(tag: BaseTagModele){
       if(this.article.tags.length >= 10 || this.state.maxTagsLengthReached){

@@ -59,7 +59,7 @@ const config: NuxtConfig = {
   firebase: {
     config: {
       apiKey: process.env.FIREBASE_API_KEY ?? '',
-      authDomain: 'letsjam-294614.firebaseapp.com',
+      authDomain: 'letsjam.io',
       databaseURL: 'https://letsjam-294614.firebaseio.com',
       projectId: 'letsjam-294614',
       storageBucket: 'letsjam-294614.appspot.com',

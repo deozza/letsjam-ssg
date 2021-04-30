@@ -91,6 +91,7 @@ import Profile from '~/entities/Front/User/Display/Profile'
 import tagsQuery from '~/apollo/queries/Tags/tags.gql'
 import BaseTagModele from '~/components/Atoms/Tag/BaseTagModele'
 import BaseTag from '~/components/Atoms/Tag/BaseTag.vue'
+import { db } from '../../../functions/src/firestoreTriggers/initializeTriggers'
 
 export default defineComponent({
   name: 'ProfileEditPage',
@@ -220,14 +221,14 @@ export default defineComponent({
         this.state.updateEmailLoading = false
       }
     },
-    addManualTag(tagName: string){
+    async addManualTag(tagName: string){
       if(tagName.length < 3){
         return
       }
       const tag: BaseTagModele = new BaseTagModele(tagName, false, true)
 
-      this.addTag(tag)
-
+      await this.addTag(tag)
+      await this.$fire.firestore.doc("tags/"+encodeURI(tagName)).set({name: tagName});
     },
     async addTag(tag: BaseTagModele){
       if(this.profile.tags.length >= 10 || this.state.maxTagsLengthReached){
