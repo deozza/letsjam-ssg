@@ -60,7 +60,7 @@ export default defineComponent({
     const displayNameInput: BaseInputModele = new BaseInputModele('text', 'displayName', 'displayName', 'Pseudo', true)
     const passwordInput: BaseInputModele = new BaseInputModele('password', 'password', 'password', 'Mot de passe', true)
     const repeatPasswordInput: BaseInputModele = new BaseInputModele('password', 'repeatPassword', 'repeatPassword', 'Confirmer le mot de passe', true)
-    const inputs: Array<BaseInputModele> = {
+    const inputs = {
       'email': emailInput,
       'displayName': displayNameInput,
       'password': passwordInput,
@@ -84,7 +84,7 @@ export default defineComponent({
           query: profileQuery,
           prefetch: true,
           variables: {
-            displayName: this.inputs.displayName.value,
+            displayName: this.inputs['displayName'].value,
           },
         })
         .then(() => {
@@ -99,14 +99,14 @@ export default defineComponent({
       }
 
       await this.$fire.auth.createUserWithEmailAndPassword(
-        this.inputs.email.value,
-        this.inputs.password.value
+        this.inputs['email'].value,
+        this.inputs['password'].value
       ).then(result => {
-        result.user?.updateProfile({displayName: this.inputs.displayName.value})
+        result.user?.updateProfile({displayName: this.inputs['displayName'].value})
         const user: User = new User({
           uid: result.user?.uid,
-          displayName: this.inputs.displayName.value,
-          email: this.inputs.email.value,
+          displayName: this.inputs['displayName'].value,
+          email: this.inputs['email'].value,
           active: true
         })
         this.$fire.firestore.collection('users').doc(result.user?.uid).set(user.toJSON())

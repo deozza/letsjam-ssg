@@ -140,11 +140,14 @@ export default defineComponent({
 
       this.tagsInput.split(',').forEach((tag, index) => {
         if(tag !== ''){
-          searchQuery += encodeURI(tag.toLowerCase().replace(' ', '-'))
+
+          const tagAsObject: BaseTagModele = new BaseTagModele(tag)
+
+          searchQuery += encodeURI(tagAsObject.title)
           searchQuery += '&'
 
-          if(!this.tags.includes(tag)){
-            this.tags.push(tag)
+          if(!this.tags.includes(tagAsObject)){
+            this.tags.push(tagAsObject)
           }
 
         }

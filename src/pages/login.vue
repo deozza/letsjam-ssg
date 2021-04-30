@@ -69,9 +69,9 @@ export default defineComponent({
 
     const emailInput: BaseInputModele = new BaseInputModele('email', 'email', 'email', 'Email', true)
     const passwordInput: BaseInputModele = new BaseInputModele('password', 'password', 'password', 'Mot de passe', true)
-    const inputs: Array<BaseInputModele> = {
-      'email': emailInput,
-      'password': passwordInput
+    const inputs = {
+      email: emailInput,
+      password: passwordInput
     }
 
     return {
@@ -86,8 +86,8 @@ export default defineComponent({
       this.loginLoading = true
       try {
         await this.$fire.auth.signInWithEmailAndPassword(
-          this.inputs.email.value,
-          this.inputs.password.value
+          this.inputs['email'].value,
+          this.inputs['password'].value
         )
         await this.$router.push('/profile')
       } catch (firebaseError) {

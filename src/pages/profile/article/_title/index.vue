@@ -192,6 +192,7 @@ export default defineComponent({
         .then((articleFromGQL: any) => {
           const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
           article.value = new ArticlePageEdit(articleGql)
+          state.maxTagsLengthReached = article.tags.length >= 10
         })
         .catch((e: any) => console.log(e))
     })
@@ -223,7 +224,7 @@ export default defineComponent({
         return
       }
 
-      if(this.article.tags.length >= 5 || this.state.maxTagsLengthReached){
+      if(this.article.tags.length >= 10 || this.state.maxTagsLengthReached){
         this.state.maxTagsLengthReached = true
         return
       }
@@ -240,7 +241,7 @@ export default defineComponent({
         .then(() => {
           this.state.updateTagsLoading = false
           this.newTag = ''
-          this.state.maxTagsLengthReached = this.article.tags.length >= 5
+          this.state.maxTagsLengthReached = this.article.tags.length >= 10
         })
         .catch((e) => {
           this.state.updateTagsLoading = false

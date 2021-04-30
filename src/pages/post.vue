@@ -137,7 +137,7 @@ export default defineComponent({
     const context = useContext()
     const articleAuthor: User = context.store.state.user.authUser
     const articleTags: Array<BaseTagModele> = []
-    const tagsPreset = ref<Array<string>>([])
+    const tagsPreset = ref<Array<BaseTagModele>>([])
     const tagsPresetLeft = ref<Array<BaseTagModele>>([])
     const articleContent: string = ''
     const newTag: string = ''
@@ -201,7 +201,7 @@ export default defineComponent({
 
     },
     addTag(tag: BaseTagModele){
-      if(this.articleTags.length >= 5 || this.state.maxTagsLengthReached){
+      if(this.articleTags.length >= 10 || this.state.maxTagsLengthReached){
         this.state.maxTagsLengthReached = true
         return
       }
@@ -214,7 +214,7 @@ export default defineComponent({
       if(this.tagsPresetLeft.map(tagPresetLeft => tagPresetLeft.title).includes(tag.title) === true){
         this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tag), 1)
       }
-      this.state.maxTagsLengthReached = this.articleTags.length >= 5
+      this.state.maxTagsLengthReached = this.articleTags.length >= 10
     },
     removeTag(tag: BaseTagModele){
       this.articleTags.splice(this.articleTags.indexOf(tag), 1)

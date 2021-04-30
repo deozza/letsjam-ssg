@@ -67,8 +67,6 @@ export default defineComponent({
     const searchLoading: boolean = false
     const tagsInput: string = ''
 
-    console.log(context.$fire.auth.currentUser)
-
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
         .query({
