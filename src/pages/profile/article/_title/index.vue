@@ -477,6 +477,9 @@ textarea {
   padding-left: 12px;
 }
 
+div.flex-row.flex-left.selected-tags{
+  align-items: center;
+}
 input#tag.add-tag-manually {
   padding: 12px;
   width: 65%
