@@ -24,15 +24,7 @@
 
       <div class="flex-row flex-left selected-tags" style="width: 100%">
         <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
-        <BaseButton
-          v-for="(tag, index) of article.tags" :key="index"
-          visual-type="primary"
-          :outline="true"
-          icon="times"
-          @buttonClicked="removeTag(tag)"
-        >
-          {{tag}}
-        </BaseButton>
+        <BaseTag v-for="(tag, index) in article.tags" :key="tag.title" :tag="tag" v-on:tagClick="removeTag($event)" />
       </div>
 
       <div class="flex-row flex-between">
@@ -156,6 +148,8 @@ import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph
 import BaseArticleLoading from '~/components/Molecules/Article/BaseArticleLoading.vue'
 import VersionGql from '~/entities/Api/Article/VersionGql'
 import ArticleVersionPageEdit from '~/entities/Front/Article/Display/ArticleVersionPageEdit'
+import BaseTag from '~/components/Atoms/Tag/BaseTag.vue'
+import BaseTagModele from '~/components/Atoms/Tag/BaseTagModele'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -163,7 +157,8 @@ export default defineComponent({
     BaseHeader,
     BaseParagraph,
     BaseButton,
-    BaseArticleLoading
+    BaseArticleLoading,
+    BaseTag
   },
   middleware: 'authenticated',
   setup() {
@@ -197,7 +192,6 @@ export default defineComponent({
         .then((articleFromGQL: any) => {
           const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
           article.value = new ArticlePageEdit(articleGql)
-          console.log(article)
         })
         .catch((e: any) => console.log(e))
     })
@@ -225,21 +219,24 @@ export default defineComponent({
         })
     },
     async addTag(tagName: string){
-      this.state.updateTagsLoading = true
+      if(tagName.length < 3){
+        return
+      }
 
       if(this.article.tags.length >= 5 || this.state.maxTagsLengthReached){
         this.state.maxTagsLengthReached = true
         return
       }
+      const tag: BaseTagModele = new BaseTagModele(tagName, false, true)
 
-      this.article.tags.push(tagName.toLowerCase().replace(' ', '-'))
+      this.article.tags.push(tag)
 
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(this.article.uid)
 
       await articleRef
-        .update({tags: this.article.tags})
+        .update({tags: this.article.tags.map(tag => tag.title)})
         .then(() => {
           this.state.updateTagsLoading = false
           this.newTag = ''
@@ -249,16 +246,16 @@ export default defineComponent({
           this.state.updateTagsLoading = false
         })
     },
-    async removeTag(tagName: string){
+    async removeTag(tag: BaseTagModele){
       this.state.updateTagsLoading = true
-      this.article.tags.splice(this.article.tags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
+      this.article.tags.splice(this.article.tags.indexOf(tag), 1)
 
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(this.article.uid)
 
       await articleRef
-        .update({tags: this.article.tags})
+        .update({tags: this.article.tags.map(tag => tag.title)})
         .then(() => {
           this.state.updateTagsLoading = false
           this.newTag = ''

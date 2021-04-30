@@ -2,6 +2,7 @@ import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import ArticleVersionPageEdit from '~/entities/Front/Article/Display/ArticleVersionPageEdit'
 import VersionGql from '~/entities/Api/Article/VersionGql'
+import BaseTagModele from '~/components/Atoms/Tag/BaseTagModele'
 
 export default class ArticlePageEdit {
   uid: string
@@ -9,7 +10,7 @@ export default class ArticlePageEdit {
   dateOfCreation: string
   dateOfLastUpdate: string
   totalLikes: number
-  tags: Array<string>
+  tags: Array<BaseTagModele>
   versions: Array<VersionGql>
   lastVersion: ArticleVersionPageEdit | null
   publishedVersion: ArticleVersionPageEdit | null
@@ -37,7 +38,10 @@ export default class ArticlePageEdit {
     this.totalLikes = article.totalLikes
 
     // @ts-ignore
-    this.tags = article.tags
+    this.tags = []
+
+
+    article.tags.forEach(tag => this.tags.push(new BaseTagModele(tag, false, true)))
 
     this.versions = article.versions
 
