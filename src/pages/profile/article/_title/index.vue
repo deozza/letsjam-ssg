@@ -28,15 +28,15 @@
       </div>
 
       <div class="flex-row flex-between">
-        <div  style="width: 33%">
+        <div class="flex-row flex-between" style="width: 50%">
           <input
             id="tag"
             v-model="newTag"
             type="text"
-            class=""
+            class="add-tag-manually"
             required
-            placeholder="Ajouter une catégorie"
-            name="Ajouter une catégorie"
+            placeholder="Nouvelle catégorie"
+            name="Nouvelle catégorie"
             minlength="1"
             maxlength="200"
           />
@@ -475,5 +475,10 @@ textarea {
   box-shadow: none;
   resize: none;
   padding-left: 12px;
+}
+
+input#tag.add-tag-manually {
+  padding: 12px;
+  width: 65%
 }
 </style>

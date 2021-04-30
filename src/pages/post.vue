@@ -50,15 +50,15 @@
     </div>
 
     <div class="flex-row flex-between">
-      <div  style="width: 33%">
+      <div class="flex-row flex-between" style="width: 50%" >
         <input
           id="tag"
           v-model="newTag"
           type="text"
-          class=""
+          class="add-tag-manually"
           required
-          placeholder="Ajouter une catégorie"
-          name="Ajouter une catégorie"
+          placeholder="Nouvelle catégorie"
+          name="Nouvelle catégorie"
           minlength="1"
           maxlength="200"
         />
@@ -285,7 +285,7 @@ export default defineComponent({
 })
 </script>
 
-<style>
+<style scoped>
 textarea {
   min-height: 40vh;
   width: 100%;
@@ -444,6 +444,11 @@ div.selected-tags{
 
 div.button-container{
   margin: 24px 0;
+}
+
+input#tag.add-tag-manually {
+  padding: 12px;
+  width: 70%
 }
 
 </style>
