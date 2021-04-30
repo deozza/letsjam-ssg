@@ -110,14 +110,7 @@ export default defineComponent({
             .then(userExist => {
               if(userExist.docs.length > 0 ){
                 if(userExist.docs[0].data().displayName !== result.user?.displayName){
-                  const userRef = this.$fire.firestore
-                    .collection('users')
-                    .doc(userExist.docs[0].data().uid)
-
-                  userRef.update({displayName: result.user?.displayName})
-
-                  this.$fire.auth.currentUser?.updateProfile({displayName: result.user?.displayName})
-
+                  this.$fire.auth.currentUser?.updateProfile({displayName: userExist.docs[0].data().displayName})
                 }
               }else{
                 const user: User = new User({
@@ -129,17 +122,11 @@ export default defineComponent({
                 this.$fire.firestore.collection('users').doc(result.user?.uid).set(user.toJSON())
               }
             })
-            .catch(e => {
-              console.log('error')
-              console.log(e)
-            })
 
         this.$router.push('/')
       }).catch(e => {
         this.alert.message =
           'Impossible de se connecter. Les identifiants sont invalides'
-
-        console.log(e)
       })
       this.loginLoading = false
 
