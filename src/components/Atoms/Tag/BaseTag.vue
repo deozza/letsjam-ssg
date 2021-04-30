@@ -1,5 +1,10 @@
 <template>
-  <span class="tag" @click="$emit('tagClick', tag)">
+  <span
+    class="tag"
+    :class="[
+       { 'hoverable': tag.canAdd || tag.canRemove },
+    ]"
+    @click="$emit('tagClick', tag)">
     <i v-if="tag.canAdd" class="fas fa-plus fa-1x"></i>
     <i v-else-if="tag.canRemove" class="fas fa-times"></i>
     {{tag.title}}
@@ -35,7 +40,8 @@ span.tag{
   font-size: 18px;
   font-weight: normal;
 }
-span.tag:hover{
+
+span.tag.hoverable:hover{
   cursor: pointer;
 }
 
