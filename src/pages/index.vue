@@ -156,8 +156,6 @@ export default defineComponent({
     },
     async changeFeedMode(mode: string){
       this.state.articleFeedMode = mode
-      this.state.articleFeedModeIsChanging = true
-
       let variables = {}
 
       if(mode === 'feed'){
