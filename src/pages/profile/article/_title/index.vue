@@ -22,34 +22,43 @@
         </div>
       </section>
 
-      <div class="flex-row flex-left selected-tags" style="width: 100%">
-        <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
-        <BaseTag v-for="(tag, index) in article.tags" :key="tag.title" :tag="tag" v-on:tagClick="removeTag($event)" />
-      </div>
+      <section class="tags">
+        <div class="flex-column flex-left">
 
-      <div class="flex-row flex-between">
-        <div class="flex-row flex-between" style="width: 50%">
-          <input
-            id="tag"
-            v-model="newTag"
-            type="text"
-            class="add-tag-manually"
-            required
-            placeholder="Nouvelle catégorie"
-            name="Nouvelle catégorie"
-            minlength="1"
-            maxlength="200"
-          />
-          <BaseButton
-            html-type="button"
-            visual-type="primary"
-            :disabled="state.maxTagsLengthReached"
-            icon="fas fa-plus"
-            @buttonClicked="addTag(newTag, true)"
-          >Ajouter</BaseButton
-          >
+          <div class="flex-row flex-left selected-tags" style="width: 100%">
+            <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
+            <BaseTag v-for="(tag, index) in article.tags" :key="tag.title" :tag="tag" v-on:tagClick="removeTag($event)" />
+          </div>
+
+          <div class="flex-row flex-between  manual-input-container">
+              <input
+                id="tag"
+                v-model="newTag"
+                type="text"
+                class="add-tag-manually"
+                required
+                placeholder="Nouvelle catégorie"
+                name="Nouvelle catégorie"
+                minlength="1"
+                maxlength="200"
+              />
+              <BaseButton
+                html-type="button"
+                visual-type="primary"
+                :disabled="state.maxTagsLengthReached"
+                icon="fas fa-plus"
+                @buttonClicked="addManualTag(newTag, true)"
+              >Ajouter</BaseButton
+              >
+          </div>
+          <div >
+            <BaseParagraph visual-type="light">Propositions de catégories :</BaseParagraph>
+            <div class="flex-row flex-left">
+              <BaseTag v-for="(tag, index) in tagsPresetLeft" :key="index" :tag="tag" v-on:tagClick="addTag($event)"/>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       <section class="publishedVersion" v-if="article.publishedVersion !== null">
         <BaseHeader html-type="h3">Version en ligne :</BaseHeader>
@@ -150,6 +159,8 @@ import VersionGql from '~/entities/Api/Article/VersionGql'
 import ArticleVersionPageEdit from '~/entities/Front/Article/Display/ArticleVersionPageEdit'
 import BaseTag from '~/components/Atoms/Tag/BaseTag.vue'
 import BaseTagModele from '~/components/Atoms/Tag/BaseTagModele'
+import User from '~/entities/Api/User/User'
+import tagsQuery from '~/apollo/queries/Tags/tags.gql'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -164,8 +175,11 @@ export default defineComponent({
   setup() {
     const context = useContext()
     const params = context.params.value
+    const user: User = context.store.getters['user/loggedUser']
     const article = ref<ArticlePageEdit>({} as ArticlePageEdit)
     const newTag: string = ''
+    const tagsPreset = ref<Array<BaseTagModele>>([])
+    const tagsPresetLeft = ref<Array<BaseTagModele>>([])
 
     const state = {
       updateTitleLoading: false,
@@ -185,14 +199,30 @@ export default defineComponent({
           query: articleEditQuery,
           prefetch: true,
           variables: {
-            displayName: decodeURI("deozza"),
+            displayName: decodeURI(user.displayName),
             title: decodeURI(params.title),
           },
         })
         .then((articleFromGQL: any) => {
           const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
           article.value = new ArticlePageEdit(articleGql)
-          state.maxTagsLengthReached = article.tags.length >= 10
+          state.maxTagsLengthReached = articleGql.tags.length >= 10
+        })
+        .catch((e: any) => console.log(e))
+
+      await context.app.apolloProvider.defaultClient
+        .query({
+          query: tagsQuery,
+          prefetch: true
+        })
+        .then((tagsFromGQL: any) => {
+          tagsFromGQL.data.tags.forEach((tagFromGql: any) => {
+
+            const tag: BaseTagModele = new BaseTagModele(tagFromGql.name, true)
+
+            tagsPreset.value.push(tag)
+            tagsPresetLeft.value.push(tag)
+          })
         })
         .catch((e: any) => console.log(e))
     })
@@ -200,6 +230,8 @@ export default defineComponent({
     return {
       article,
       newTag,
+      tagsPreset,
+      tagsPresetLeft,
       state
     }
   },
@@ -219,16 +251,20 @@ export default defineComponent({
           this.state.updateTitleLoading = false
         })
     },
-    async addTag(tagName: string){
+    addManualTag(tagName: string){
       if(tagName.length < 3){
         return
       }
+      const tag: BaseTagModele = new BaseTagModele(tagName, false, true)
 
+      this.addTag(tag)
+
+    },
+    async addTag(tag: BaseTagModele){
       if(this.article.tags.length >= 10 || this.state.maxTagsLengthReached){
         this.state.maxTagsLengthReached = true
         return
       }
-      const tag: BaseTagModele = new BaseTagModele(tagName, false, true)
 
       this.article.tags.push(tag)
 
@@ -484,5 +520,9 @@ div.flex-row.flex-left.selected-tags{
 input#tag.add-tag-manually {
   padding: 12px;
   width: 65%
+}
+
+section.tags > div.flex-column > div{
+  margin: 12px 0;
 }
 </style>
