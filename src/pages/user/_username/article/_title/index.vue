@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <article>
     <div v-if="$fetchState.pending">
       <BaseArticleLoading></BaseArticleLoading>
     </div>
@@ -17,8 +17,7 @@
           article.authorDisplayName
         }}</BaseLink>
         <BaseParagraph itemprop="datePublished"
-          >Le
-          {{ getDateFromTimestamp(article.dateOfLastUpdate) }}</BaseParagraph
+          >{{article.dateOfLastUpdateComputed}}</BaseParagraph
         >
       </div>
       <div
@@ -26,8 +25,8 @@
         class="article-content"
         v-html="$md.render(article.content)"
       />
-      <div class="article-header">
-        <div class="flex-row flex-left">
+      <div class="article-header article-footer">
+        <div class="flex-row flex-between">
           <BaseParagraph
             class="p-footer"
             >{{ article.totalLikes }} <i
@@ -40,10 +39,13 @@
             @click="likeArticle()"
           ></i
           ></BaseParagraph>
+          <BaseParagraph visual-type="light" class="article-tags">
+            <BaseLink v-for="(tag, index) in article.tags" :key="index" :link="tag">{{tag.title}}</BaseLink>
+          </BaseParagraph>
         </div>
       </div>
     </div>
-  </section>
+  </article>
 </template>
 
 <script lang="ts">
@@ -106,10 +108,6 @@ export default defineComponent({
     }
   },
   methods: {
-    getDateFromTimestamp(timestamp: string) {
-      const timestampAsNumber: number = +timestamp
-      return new Date(timestampAsNumber).toLocaleString()
-    },
     async likeArticle(){
       if(!this.isLoggedIn){
         return
@@ -170,9 +168,18 @@ div.article-viewer.border {
   border: 1px solid var(--secondary_bg_hover);
 }
 
-div.article-viewer > div.article-header > a {
+div.article-viewer > div.article-header > a,
+div.article-viewer > div.article-footer > div.flex-row > p.article-tags > a.tag-link {
   text-decoration: none;
   color: black;
+}
+
+div.article-viewer > div.article-footer > div.flex-row > p.article-tags {
+  margin-bottom: 12px;
+}
+
+div.article-viewer > div.article-footer > div.flex-row > p.article-tags > a.tag-link{
+  margin-right: 12px;
 }
 
 div.article-header div p.p-footer {

@@ -18,45 +18,47 @@
             minlength="10"
             maxlength="200"
           />
-          <BaseButton v-if="!article.allVersionsAreArchived" html-type="submit" visual-type="success" @buttonClicked="updateTitle()" :loading="updateTitleLoading">Editer le titre</BaseButton>
+          <BaseButton v-if="!article.allVersionsAreArchived" html-type="submit" visual-type="success" @buttonClicked="updateTitle()" :loading="state.updateTitleLoading">Editer le titre</BaseButton>
         </div>
       </section>
 
-      <div class="flex-row flex-left selected-tags" style="width: 100%">
-        <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
-        <BaseButton
-          v-for="(tag, index) of article.tags" :key="index"
-          visual-type="primary"
-          :outline="true"
-          icon="times"
-          @buttonClicked="removeTag(tag)"
-        >
-          {{tag}}
-        </BaseButton>
-      </div>
+      <section class="tags">
+        <div class="flex-column flex-left">
 
-      <div class="flex-row flex-between">
-        <div  style="width: 33%">
-          <input
-            id="tag"
-            v-model="newTag"
-            type="text"
-            class=""
-            required
-            placeholder="Ajouter une catégorie"
-            name="Ajouter une catégorie"
-            minlength="1"
-            maxlength="200"
-          />
-          <BaseButton
-            html-type="button"
-            visual-type="primary"
-            icon="plus"
-            @buttonClicked="addTag(newTag, true)"
-          >Ajouter</BaseButton
-          >
+          <div class="flex-row flex-left selected-tags" style="width: 100%">
+            <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
+            <BaseTag v-for="(tag, index) in article.tags" :key="tag.title" :tag="tag" v-on:tagClick="removeTag($event)" />
+          </div>
+
+          <div class="flex-row flex-between  manual-input-container">
+              <input
+                id="tag"
+                v-model="newTag"
+                type="text"
+                class="add-tag-manually"
+                required
+                placeholder="Nouvelle catégorie"
+                name="Nouvelle catégorie"
+                minlength="1"
+                maxlength="200"
+              />
+              <BaseButton
+                html-type="button"
+                visual-type="primary"
+                :disabled="state.maxTagsLengthReached"
+                icon="fas fa-plus"
+                @buttonClicked="addManualTag(newTag, true)"
+              >Ajouter</BaseButton
+              >
+          </div>
+          <div >
+            <BaseParagraph visual-type="light">Propositions de catégories :</BaseParagraph>
+            <div class="flex-row flex-left">
+              <BaseTag v-for="(tag, index) in tagsPresetLeft" :key="index" :tag="tag" v-on:tagClick="addTag($event)"/>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       <section class="publishedVersion" v-if="article.publishedVersion !== null">
         <BaseHeader html-type="h3">Version en ligne :</BaseHeader>
@@ -65,7 +67,7 @@
           name="editor"
           placeholder="Ecrire ici votre article"
         ></textarea>
-        <BaseButton v-if="article.lastVersion === null" visual-type="success" @buttonClicked="newArticleVersion()" :loading="newArticleVersionLoading">Modifier l'article</BaseButton>
+        <BaseButton v-if="article.lastVersion === null" visual-type="success" @buttonClicked="newArticleVersion()" :loading="state.newArticleVersionLoading">Modifier l'article</BaseButton>
       </section>
 
       <section class="lastVersion" v-if="article.lastVersion !== null">
@@ -78,7 +80,7 @@
             name="editor"
             placeholder="Ecrire ici votre article"
           ></textarea>
-          <BaseButton visual-type="success" @buttonClicked="updateLastVersion()" :loading="updateLastVersionLoading">Corriger l'article</BaseButton>
+          <BaseButton visual-type="success" @buttonClicked="updateLastVersion()" :loading="state.updateLastVersionLoading">Corriger l'article</BaseButton>
         </div>
 
         <div
@@ -97,8 +99,8 @@
           placeholder="Ecrire ici votre article"
         ></textarea>
         <div class="flex-row flex-around">
-          <BaseButton visual-type="warning" @buttonClicked="updateDraft()" :loading="updateDraftLoading">Modifier le brouillon</BaseButton>
-          <BaseButton visual-type="success" @buttonClicked="publishDraft()" :loading="publishDraftLoading">Mettre en ligne l'article</BaseButton>
+          <BaseButton visual-type="warning" @buttonClicked="updateDraft()" :loading="state.updateDraftLoading">Modifier le brouillon</BaseButton>
+          <BaseButton visual-type="success" @buttonClicked="publishDraft()" :loading="state.publishDraftLoading">Mettre en ligne l'article</BaseButton>
         </div>
       </section>
 
@@ -136,8 +138,8 @@
         <BaseHeader html-type="h3">Archiver ou supprimer mon article</BaseHeader>
         <BaseParagraph>Votre article n'est plus à votre goût ? Pour ne plus qu'il soit visible par les autres membres, vous pouvez l'archiver. Vous pourrez ainsi conserver toutes ses statistiques, comme les likes et le nombre de vues. Vous pouvez également le supprimer. Il sera alors entièrement effacé</BaseParagraph>
         <BaseParagraph visual-type="danger">Attention ! Ces actions sont irréversibles !</BaseParagraph>
-        <BaseButton v-if="!article.allVersionsAreArchived" visual-type="warning" icon="fas fa-lock" :loading="archiveArticleLoading" @buttonClicked="archiveArticle()">Archiver</BaseButton>
-        <BaseButton visual-type="danger" icon="fas fa-trash-alt" :loading="deleteArticleLoading" @buttonClicked="deleteArticle()">Supprimer</BaseButton>
+        <BaseButton v-if="!article.allVersionsAreArchived" visual-type="warning" icon="fas fa-lock" :loading="state.archiveArticleLoading" @buttonClicked="archiveArticle()">Archiver</BaseButton>
+        <BaseButton visual-type="danger" icon="fas fa-trash-alt" :loading="state.deleteArticleLoading" @buttonClicked="deleteArticle()">Supprimer</BaseButton>
       </section>
     </section>
   </section>
@@ -150,11 +152,15 @@ import articleEditQuery from '~/apollo/queries/Article/articleEdit.gql'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import ArticlePageEdit from '~/entities/Front/Article/Display/ArticlePageEdit'
-import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion.ts'
+import ArticleVersion, { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import BaseArticleLoading from '~/components/Molecules/Article/BaseArticleLoading.vue'
 import VersionGql from '~/entities/Api/Article/VersionGql'
 import ArticleVersionPageEdit from '~/entities/Front/Article/Display/ArticleVersionPageEdit'
+import BaseTag from '~/components/Atoms/Tag/BaseTag.vue'
+import BaseTagModele from '~/components/Atoms/Tag/BaseTagModele'
+import User from '~/entities/Api/User/User'
+import tagsQuery from '~/apollo/queries/Tags/tags.gql'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -162,22 +168,30 @@ export default defineComponent({
     BaseHeader,
     BaseParagraph,
     BaseButton,
-    BaseArticleLoading
+    BaseArticleLoading,
+    BaseTag
   },
   middleware: 'authenticated',
   setup() {
     const context = useContext()
     const params = context.params.value
+    const user: User = context.store.getters['user/loggedUser']
     const article = ref<ArticlePageEdit>({} as ArticlePageEdit)
     const newTag: string = ''
-    const updateTitleLoading: boolean = false
-    const updateTagsLoading: boolean = false
-    const newArticleVersionLoading: boolean = false
-    const updateLastVersionLoading: boolean = false
-    const updateDraftLoading: boolean = false
-    const publishDraftLoading: boolean = false
-    const archiveArticleLoading: boolean = false
-    const deleteArticleLoading: boolean = false
+    const tagsPreset = ref<Array<BaseTagModele>>([])
+    const tagsPresetLeft = ref<Array<BaseTagModele>>([])
+
+    const state = {
+      updateTitleLoading: false,
+      updateTagsLoading: false,
+      newArticleVersionLoading: false,
+      updateLastVersionLoading: false,
+      updateDraftLoading: false,
+      publishDraftLoading: false,
+      archiveArticleLoading: false,
+      deleteArticleLoading: false,
+      maxTagsLengthReached: false
+    }
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -185,14 +199,30 @@ export default defineComponent({
           query: articleEditQuery,
           prefetch: true,
           variables: {
-            displayName: decodeURI("deozza"),
+            displayName: decodeURI(user.displayName),
             title: decodeURI(params.title),
           },
         })
         .then((articleFromGQL: any) => {
           const articleGql: ArticleGql = new ArticleGql(articleFromGQL.data.article)
           article.value = new ArticlePageEdit(articleGql)
-          console.log(article)
+          state.maxTagsLengthReached = articleGql.tags.length >= 10
+        })
+        .catch((e: any) => console.log(e))
+
+      await context.app.apolloProvider.defaultClient
+        .query({
+          query: tagsQuery,
+          prefetch: true
+        })
+        .then((tagsFromGQL: any) => {
+          tagsFromGQL.data.tags.forEach((tagFromGql: any) => {
+
+            const tag: BaseTagModele = new BaseTagModele(tagFromGql.name, true)
+
+            tagsPreset.value.push(tag)
+            tagsPresetLeft.value.push(tag)
+          })
         })
         .catch((e: any) => console.log(e))
     })
@@ -200,19 +230,14 @@ export default defineComponent({
     return {
       article,
       newTag,
-      updateTitleLoading,
-      updateTagsLoading,
-      newArticleVersionLoading,
-      updateLastVersionLoading,
-      updateDraftLoading,
-      publishDraftLoading,
-      archiveArticleLoading,
-      deleteArticleLoading
+      tagsPreset,
+      tagsPresetLeft,
+      state
     }
   },
   methods: {
     async updateTitle(){
-      this.updateTitleLoading = true
+      this.state.updateTitleLoading = true
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(this.article.uid)
@@ -220,51 +245,65 @@ export default defineComponent({
       await articleRef
         .update({title: this.article.title})
         .then(() => {
-          this.updateTitleLoading = false
+          this.state.updateTitleLoading = false
         })
         .catch((e) => {
-          this.updateTitleLoading = false
+          this.state.updateTitleLoading = false
         })
     },
-    async addTag(tagName: string){
-      this.updateTagsLoading = true
-      this.article.tags.push(tagName.toLowerCase().replace(' ', '-'))
+    async addManualTag(tagName: string){
+      if(tagName.length < 3){
+        return
+      }
+      const tag: BaseTagModele = new BaseTagModele(tagName, false, true)
+
+      await this.addTag(tag)
+      await this.$fire.firestore.doc("tags/"+encodeURI(tagName)).set({name: tagName});
+    },
+    async addTag(tag: BaseTagModele){
+      if(this.article.tags.length >= 10 || this.state.maxTagsLengthReached){
+        this.state.maxTagsLengthReached = true
+        return
+      }
+
+      this.article.tags.push(tag)
 
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(this.article.uid)
 
       await articleRef
-        .update({tags: this.article.tags})
+        .update({tags: this.article.tags.map(tag => tag.title)})
         .then(() => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
           this.newTag = ''
+          this.state.maxTagsLengthReached = this.article.tags.length >= 10
         })
         .catch((e) => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
         })
     },
-    async removeTag(tagName: string){
-      this.updateTagsLoading = true
-      this.article.tags.splice(this.article.tags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
+    async removeTag(tag: BaseTagModele){
+      this.state.updateTagsLoading = true
+      this.article.tags.splice(this.article.tags.indexOf(tag), 1)
 
       const articleRef = this.$fire.firestore
         .collection('articles')
         .doc(this.article.uid)
 
       await articleRef
-        .update({tags: this.article.tags})
+        .update({tags: this.article.tags.map(tag => tag.title)})
         .then(() => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
           this.newTag = ''
 
         })
         .catch((e) => {
-          this.updateTagsLoading = false
+          this.state.updateTagsLoading = false
         })
     },
     async newArticleVersion(){
-      this.newArticleVersionLoading = true
+      this.state.newArticleVersionLoading = true
 
       const articleVersion: ArticleVersion = new ArticleVersion({})
       articleVersion.content = this.article.publishedVersion!.content
@@ -283,14 +322,14 @@ export default defineComponent({
         .then(() => {
 
           this.article.lastVersion = new ArticleVersionPageEdit(new VersionGql(articleVersion))
-          this.newArticleVersionLoading = false
+          this.state.newArticleVersionLoading = false
         })
         .catch((e) => {
-          this.newArticleVersionLoading = false
+          this.state.newArticleVersionLoading = false
         })
     },
     async updateLastVersion(){
-      this.updateLastVersionLoading = true
+      this.state.updateLastVersionLoading = true
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -301,16 +340,16 @@ export default defineComponent({
       await articleRef
         .update({content: this.article.lastVersion!.content, state: ArticleVersionState.PRE_PUBLISHED})
         .then(() => {
-          this.updateLastVersionLoading = false
+          this.state.updateLastVersionLoading = false
 
         })
         .catch((e) => {
           console.log(e)
-          this.updateLastVersionLoading = false
+          this.state.updateLastVersionLoading = false
         })
     },
     async updateDraft(){
-      this.updateDraftLoading = true
+      this.state.updateDraftLoading = true
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -321,14 +360,14 @@ export default defineComponent({
       await articleRef
         .update({content: this.article.draftVersion!.content})
         .then(() => {
-          this.updateDraftLoading = false
+          this.state.updateDraftLoading = false
         })
         .catch((e) => {
-          this.updateDraftLoading = false
+          this.state.updateDraftLoading = false
         })
     },
     async publishDraft(){
-      this.publishDraftLoading = true
+      this.state.publishDraftLoading = true
 
       const articleRef = this.$fire.firestore
         .collection('articles')
@@ -339,14 +378,14 @@ export default defineComponent({
       await articleRef
         .update({content: this.article.draftVersion!.content, state: ArticleVersionState.PRE_PUBLISHED})
         .then(() => {
-          this.publishDraftLoading = false
+          this.state.publishDraftLoading = false
         })
         .catch((e) => {
-          this.publishDraftLoading = false
+          this.state.publishDraftLoading = false
         })
     },
     async archiveArticle(){
-      this.archiveArticleLoading = true
+      this.state.archiveArticleLoading = true
 
       let uids = []
 
@@ -374,17 +413,17 @@ export default defineComponent({
         articleVersionRef
           .update({content: '', state: ArticleVersionState.ARCHIVED})
           .then(() => {
-            this.archiveArticleLoading = false
+            this.state.archiveArticleLoading = false
           })
           .catch((e) => {
             console.log(e)
-            this.archiveArticleLoading = false
+            this.state.archiveArticleLoading = false
           })
       })
 
     },
     async deleteArticle(){
-      this.deleteArticleLoading = true
+      this.state.deleteArticleLoading = true
 
       let uids = []
 
@@ -413,7 +452,7 @@ export default defineComponent({
           .delete()
           .catch((e) => {
             console.log(e)
-            this.archiveArticleLoading = false
+            this.state.deleteArticleLoading = false
           })
       })
 
@@ -424,20 +463,20 @@ export default defineComponent({
       await articleRef
         .delete()
         .then(() => {
-          this.archiveArticleLoading = false
+          this.state.deleteArticleLoading = false
           this.$router.push('/profile')
 
         })
         .catch((e) => {
           console.log(e)
-          this.archiveArticleLoading = false
+          this.state.deleteArticleLoading = false
         })
     }
   }
 })
 </script>
 
-<style>
+<style scoped>
 section section section {
   background-color: white;
   margin: 12px 0;
@@ -473,5 +512,17 @@ textarea {
   box-shadow: none;
   resize: none;
   padding-left: 12px;
+}
+
+div.flex-row.flex-left.selected-tags{
+  align-items: center;
+}
+input#tag.add-tag-manually {
+  padding: 12px;
+  width: 65%
+}
+
+section.tags > div.flex-column > div{
+  margin: 12px 0;
 }
 </style>

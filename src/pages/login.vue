@@ -9,44 +9,30 @@
       </div>
 
       <ul>
-        <li class="flex-column">
-          <div class="flex-row input-row">
-            <label for="email">
-              Email<span class="required-field">*</span>
-            </label>
-
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              name="email"
-            />
-          </div>
-        </li>
-        <li class="flex-column">
-          <div class="flex-row input-row">
-            <label for="password">
-              Mot de passe<span class="required-field">*</span>
-            </label>
-
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              name="password"
-            />
-          </div>
-        </li>
+        <BaseInput v-for="(input,index) in inputs" :key="index" :input="input"/>
       </ul>
+
       <div class="flex-column">
-        <BaseButton
-          html-type="submit"
-          visual-type="success"
-          :loading="loginLoading"
+        <div class="flex-row flex-between" style="width: 50%">
+          <BaseButton
+            html-type="submit"
+            visual-type="success"
+            :loading="loginLoading"
           >Continuer</BaseButton
-        >
+          >
+          <BaseParagraph>Ou</BaseParagraph>
+          <BaseButton
+            html-type="button"
+            :loading="loginLoading"
+            :outline="true"
+            visual-type="secondary"
+            icon="fab fa-google"
+            v-on:buttonClicked="googleSignin()"
+          >
+            Se connecter avec Google
+          </BaseButton>
+        </div>
+
         <BaseLink :link="linkToSignin">{{linkToSignin.title}}</BaseLink>
       </div>
     </form>
@@ -61,6 +47,11 @@ import BaseAlertModele from '~/components/Atoms/Alert/BaseAlertModele'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
+import BaseInput from '~/components/Atoms/Input/BaseInput.vue'
+import BaseInputModele from '~/components/Atoms/Input/BaseInputModele'
+
+import firebase from 'firebase'
+import User from '~/entities/Api/User/User'
 
 export default defineComponent({
   name: 'LoginPage',
@@ -68,18 +59,23 @@ export default defineComponent({
     BaseHeader,
     BaseButton,
     BaseParagraph,
-    BaseLink
+    BaseLink,
+    BaseInput
   },
   setup() {
-    const email: string = ''
-    const password: string = ''
     const alert: BaseAlertModele = new BaseAlertModele('', '')
     const loginLoading: boolean = false
     const linkToSignin: BaseLinkModele = new BaseLinkModele(['signin'], 'Pas de compte ? En créer un.', true)
 
+    const emailInput: BaseInputModele = new BaseInputModele('email', 'email', 'email', 'Email', true)
+    const passwordInput: BaseInputModele = new BaseInputModele('password', 'password', 'password', 'Mot de passe', true)
+    const inputs = {
+      email: emailInput,
+      password: passwordInput
+    }
+
     return {
-      email,
-      password,
+      inputs,
       alert,
       loginLoading,
       linkToSignin,
@@ -90,16 +86,51 @@ export default defineComponent({
       this.loginLoading = true
       try {
         await this.$fire.auth.signInWithEmailAndPassword(
-          this.email,
-          this.password
+          this.inputs['email'].value,
+          this.inputs['password'].value
         )
         await this.$router.push('/profile')
       } catch (firebaseError) {
         this.alert.message =
           'Impossible de se connecter. Les identifiants sont invalides'
       }
+
       this.loginLoading = false
     },
+    async googleSignin(){
+      this.loginLoading = true
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      await this.$fire.auth.signInWithPopup(provider).then(result => {
+          this.$fire.firestore
+            .collection('users')
+            .where('email', '==', result.user?.email)
+            .get()
+            .then(userExist => {
+              if(userExist.docs.length > 0 ){
+                if(userExist.docs[0].data().displayName !== result.user?.displayName){
+                  this.$fire.auth.currentUser?.updateProfile({displayName: userExist.docs[0].data().displayName})
+                }
+              }else{
+                const user: User = new User({
+                  uid: result.user?.uid,
+                  displayName: result.user?.displayName,
+                  email: result.user?.email,
+                  active: true
+                })
+                this.$fire.firestore.collection('users').doc(result.user?.uid).set(user.toJSON())
+              }
+            })
+
+        this.$router.push('/')
+      }).catch(e => {
+        this.alert.message =
+          'Impossible de se connecter. Les identifiants sont invalides'
+      })
+      this.loginLoading = false
+
+    }
   },
 })
 </script>
@@ -111,42 +142,12 @@ form {
   border-radius: 7px;
 }
 
-form div.flex-column p {
+form > div.flex-column > p {
   padding: 12px 0;
   text-align: center;
 }
 
-form > ul > li > div {
-  padding: 0.5em;
-  align-items: normal;
-}
-
-form > ul > li > div > label {
-  flex: 1;
-  padding: 0.5em 1em 0.5em 0;
-}
-
-form > ul > li > div > input,
-form > ul > li > div > select {
-  flex: 2;
-}
-
-form > ul > li > div > label span.required-field {
-  margin-left: 6px;
-  color: var(--danger_text);
-}
-
-form ul li div.input-row {
-  width: 98%;
-}
-
 form div.flex-column a{
   padding: 12px 0;
-}
-
-@media screen and (max-width: 760px) {
-  form ul li .flex-row {
-    flex-direction: column;
-  }
 }
 </style>

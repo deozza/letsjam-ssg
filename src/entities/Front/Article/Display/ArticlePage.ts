@@ -4,9 +4,10 @@ import ArticleGql from '~/entities/Api/Article/ArticleGql'
 export default class ArticlePage {
   title: string
   dateOfLastUpdate: number
+  dateOfLastUpdateComputed: string
   authorDisplayName: string
   totalLikes: number
-  tags: Array<string>
+  tags: Array<BaseLinkModele>
   content: string
   authorLink: BaseLinkModele
   isLikedByReader: boolean
@@ -18,6 +19,9 @@ export default class ArticlePage {
     // @ts-ignore
     this.dateOfLastUpdate = article.dateOfLastUpdate
 
+    const timestampAsNumber: number = +article.dateOfLastUpdate
+    this.dateOfLastUpdateComputed = 'Le ' + new Date(timestampAsNumber).toLocaleTimeString(['FR-fr'], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})
+
     // @ts-ignore
     this.authorDisplayName = article.user.displayName
 
@@ -25,7 +29,12 @@ export default class ArticlePage {
     this.totalLikes = article.totalLikes
 
     // @ts-ignore
-    this.tags = article.tags
+    this.tags = []
+
+    article.tags.forEach((tag:string) => {
+      const searchLinkForTag: BaseLinkModele = new BaseLinkModele(['search', tag], '#'+tag, true, '', ['tag-link'])
+      this.tags.push(searchLinkForTag)
+    })
 
     // @ts-ignore
     this.content = article.currentVersion.content

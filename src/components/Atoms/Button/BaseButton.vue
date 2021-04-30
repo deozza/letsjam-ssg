@@ -15,7 +15,7 @@
       <i v-if="loading" class="fas fa-spinner fa-spin"></i>
     </slot>
     <slot name="icon">
-      <i v-if="!loading && icon.length > 0" :class="'fas fa-' + icon"></i>
+      <i v-if="!loading && icon.length > 0" :class="icon"></i>
     </slot>
     <slot></slot>
   </button>
@@ -160,7 +160,7 @@ button.btn.btn-primary.btn-outline:hover {
 }
 
 button.btn.btn-secondary {
-  color: white;
+  color: black;
   background-color: var(--secondary_bg);
   border-color: var(--secondary_border);
 }
@@ -172,11 +172,11 @@ button.btn.secondary:hover {
 }
 
 button.btn.btn-secondary.btn-outline {
-  color: var(--secondary_bg);
+  color: black;
   background-color: transparent;
 }
 button.btn.btn-secondary.btn-outline:hover {
-  color: white;
+  color: black;
   text-decoration: none;
   background-color: var(--secondary_bg);
   border-color: var(--secondary_border);

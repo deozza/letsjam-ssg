@@ -28,6 +28,7 @@ const typeDefs = gql`
     email: String!
     articles: [Articles]
     likedArticles: [UserArticleLike]
+    tags: [String]
   }
 
   type Articles {

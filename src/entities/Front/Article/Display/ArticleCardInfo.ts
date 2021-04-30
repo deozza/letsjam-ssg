@@ -4,11 +4,12 @@ import ArticleGql from '~/entities/Api/Article/ArticleGql'
 export default class ArticleCardInfo {
   title: string
   dateOfLastUpdate: number
+  dateOfLastUpdateComputed: string
   authorDisplayName: string
   totalLikes: number
   articleLink: BaseLinkModele
   authorLink: BaseLinkModele
-  tags: Array<string>
+  tags: Array<BaseLinkModele>
 
   constructor(articleGql: ArticleGql) {
     // @ts-ignore
@@ -16,6 +17,9 @@ export default class ArticleCardInfo {
 
     // @ts-ignore
     this.dateOfLastUpdate = articleGql.dateOfLastUpdate
+
+    const timestampAsNumber: number = +articleGql.dateOfLastUpdate
+    this.dateOfLastUpdateComputed = 'Le ' + new Date(timestampAsNumber).toLocaleTimeString(['FR-fr'], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})
 
     // @ts-ignore
     this.authorDisplayName = articleGql.user.displayName
@@ -30,11 +34,16 @@ export default class ArticleCardInfo {
     )
     this.authorLink = new BaseLinkModele(
       ['user', this.authorDisplayName],
-      this.title,
+      'De ' + this.authorDisplayName,
       true
     )
 
-    this.tags = articleGql.tags
+    this.tags = []
+
+    articleGql.tags.forEach((tag:string) => {
+      const searchLinkForTag: BaseLinkModele = new BaseLinkModele(['search', tag], '#'+tag, true, '', ['tag-link'])
+      this.tags.push(searchLinkForTag)
+    })
   }
 
   toJSON(): any {

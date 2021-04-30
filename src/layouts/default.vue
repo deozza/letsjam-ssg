@@ -40,15 +40,8 @@ export default defineComponent({
   setup() {
     const { store } = useContext()
 
-    const aboutLink: BaseLinkModele = new BaseLinkModele(
-      ['about'],
-      'A propos',
-      true,
-    )
 
-    const footerLinks: Array<BaseLinkModele> = [
-      aboutLink
-    ]
+    const footerLinks: Array<BaseLinkModele> = []
 
     const loginLink: BaseLinkModele = new BaseLinkModele(
       ['login'],
@@ -61,7 +54,7 @@ export default defineComponent({
       true
     )
 
-    const menuLinksAnonymous: Array<BaseLinkModele> = [loginLink, signinLink, aboutLink]
+    const menuLinksAnonymous: Array<BaseLinkModele> = [loginLink, signinLink]
 
     const postLink: BaseLinkModele = new BaseLinkModele(
       ['post'],

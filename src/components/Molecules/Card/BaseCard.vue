@@ -6,10 +6,10 @@
   >
     <div class="card-header">
       <BaseLink itemprop="author" :link="article.authorLink">{{
-        article.authorDisplayName
+        article.authorLink.title
       }}</BaseLink>
       <BaseParagraph itemprop="datePublished">{{
-        getDateFromTimestamp(article.dateOfLastUpdate)
+        article.dateOfLastUpdateComputed
       }}</BaseParagraph>
     </div>
     <div class="card-content">
@@ -25,7 +25,7 @@
           >{{ article.totalLikes }} <i class="far fa-heart"></i
         ></BaseParagraph>
         <BaseParagraph visual-type="light" class="article-tags">
-          <span v-for="(tag, index) in article.tags" :key="index">#{{tag}}</span>
+          <BaseLink v-for="(tag, index) in article.tags" :key="index" :link="tag">{{tag.title}}</BaseLink>
         </BaseParagraph>
       </div>
     </div>
@@ -57,10 +57,6 @@ export default defineComponent({
     redirectToArticle() {
       this.$router.push(this.article.articleLink.link)
     },
-    getDateFromTimestamp(timestamp: string) {
-      const timestampAsNumber: number = +timestamp
-      return new Date(timestampAsNumber).toLocaleString()
-    },
   },
 })
 </script>
@@ -83,14 +79,9 @@ div.article-card > div.card-header {
   padding-left: 24px;
 }
 
-div.article-card > div.card-header.card-footer {
+div.article-card > div.card-footer {
   width: 95%;
 }
-
-div.article-card > div.card-header.card-footer > div > p > span{
-  margin-right: 12px;
-}
-
 div.article-card > div.card-content > a {
   text-decoration: none;
 }
@@ -99,13 +90,18 @@ div.article-card > div.card-content > a :hover {
   color: var(--primary_text_hover) !important;
 }
 
-div.article-card > div.card-header > a {
+div.article-card > div.card-header > a,
+div.article-card > div.card-footer > div.flex-row > p.article-tags > a.tag-link{
   text-decoration: none;
   color: black;
 }
 
 div.article-card > div.card-header > a:hover {
   color: var(--primary_text_hover);
+}
+
+div.article-card > div.card-footer > div.flex-row > p.article-tags > a.tag-link{
+  margin-right: 12px;
 }
 
 @media only screen and (max-width: 1024px) {

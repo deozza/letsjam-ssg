@@ -30,7 +30,7 @@ export default class ArticlePost {
     this.totalLikes = 'totalLikes' in article ? article.totalLikes : 0
 
     // @ts-ignore
-    this.tags = 'tags' in article ? article.tags : []
+    this.tags = 'tags' in article ? article.tags.map(tag => tag.title) : []
   }
 
 
