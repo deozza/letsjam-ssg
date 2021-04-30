@@ -15,7 +15,7 @@
             <input
               id="tag"
               v-model="tagsInput"
-              type="text"
+              type="textarea"
               class="input-text-title"
               required
               placeholder="Rechercher un article (séparez les catégories par une virgule)"
@@ -157,7 +157,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 section.search {
   background-color: white;
   margin: 12px 0 48px 0;
@@ -177,5 +176,11 @@ input#tag {
 
 input#tag.input-text-title {
   font-size: 1em;
+}
+
+@media only screen and (max-width: 1024px) {
+  input#tag {
+    width: 60%
+  }
 }
 </style>

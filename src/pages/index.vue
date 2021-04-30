@@ -108,7 +108,7 @@ export default defineComponent({
 })
 </script>
 
-<style>
+<style scoped>
 section.search {
   background-color: white;
   margin: 12px 0 48px 0;
@@ -128,5 +128,11 @@ input#tag {
 
 input#tag.input-text-title {
   font-size: 1em;
+}
+
+@media only screen and (max-width: 1024px) {
+  input#tag {
+    width: 60%
+  }
 }
 </style>

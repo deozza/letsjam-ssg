@@ -44,40 +44,44 @@
     </div>
 
 
-    <div class="flex-row flex-left selected-tags" style="width: 100%">
-      <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
-      <BaseTag v-for="(tag, index) in articleTags" :key="tag.title" :tag="tag" v-on:tagClick="removeTag($event)" />
-    </div>
+    <section class="tags">
 
-    <div class="flex-row flex-between">
-      <div class="flex-row flex-between" style="width: 50%" >
-        <input
-          id="tag"
-          v-model="newTag"
-          type="text"
-          class="add-tag-manually"
-          required
-          placeholder="Nouvelle catégorie"
-          name="Nouvelle catégorie"
-          minlength="1"
-          maxlength="200"
-        />
-        <BaseButton
-          html-type="button"
-          visual-type="primary"
-          :disabled="state.maxTagsLengthReached"
-          icon="plus"
-          v-on:buttonClicked="addManualTag(newTag)"
-        >Ajouter</BaseButton
-        >
-      </div>
-      <div >
-        <BaseParagraph visual-type="light">Propositions de catégories :</BaseParagraph>
-        <div class="flex-row flex-left">
-          <BaseTag v-for="(tag, index) in tagsPresetLeft" :key="index" :tag="tag" v-on:tagClick="addTag($event)"/>
+      <div class="flex-column flex-left">
+
+        <div class="flex-row flex-left selected-tags" style="width: 100%">
+          <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
+          <BaseTag v-for="(tag, index) in articleTags" :key="tag.title" :tag="tag" v-on:tagClick="removeTag($event)" />
+        </div>
+
+        <div class="flex-row flex-between manual-input-container">
+          <input
+            id="tag"
+            v-model="newTag"
+            type="text"
+            class="add-tag-manually"
+            required
+            placeholder="Nouvelle catégorie"
+            name="Nouvelle catégorie"
+            minlength="1"
+            maxlength="200"
+          />
+          <BaseButton
+            html-type="button"
+            visual-type="primary"
+            :disabled="state.maxTagsLengthReached"
+            icon="plus"
+            v-on:buttonClicked="addManualTag(newTag)"
+          >Ajouter</BaseButton
+          >
+        </div>
+        <div >
+          <BaseParagraph visual-type="light">Propositions de catégories :</BaseParagraph>
+          <div class="flex-row flex-left">
+            <BaseTag v-for="(tag, index) in tagsPresetLeft" :key="index" :tag="tag" v-on:tagClick="addTag($event)"/>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <div class="button-container">
       <BaseButton
@@ -446,9 +450,34 @@ div.button-container{
   margin: 24px 0;
 }
 
+section.tags > div.flex-column > div{
+  margin: 12px 0;
+}
+
+div.flex-row.flex-left.selected-tags{
+  align-items: center;
+}
+
+div.manual-input-container{
+  width: 50%;
+}
+
+
 input#tag.add-tag-manually {
   padding: 12px;
   width: 70%
 }
+
+@media only screen and (max-width: 1024px) {
+  div.manual-input-container{
+    width: 100%;
+  }
+
+  input#tag.add-tag-manually {
+    width: 100%
+  }
+
+}
+
 
 </style>
