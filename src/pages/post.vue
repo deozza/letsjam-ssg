@@ -36,73 +36,59 @@
         </section>
         <section id="preview" class="tab-panel">
           <BaseHeader itemprop="name" html-type="h2">{{
-            articleTitle
-          }}</BaseHeader>
+              articleTitle
+            }}</BaseHeader>
           <div class="content" v-html="$md.render(articleContent)" />
         </section>
       </div>
     </div>
 
 
-    <div class="flex-row flex-left selected-tags" style="width: 100%">
-      <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
-      <BaseButton
-        v-for="(tag, index) of articleTags" :key="index"
-        visual-type="primary"
-        :outline="true"
-        icon="times"
-        @buttonClicked="removeTag(tag)"
-      >
-        {{tag}}
-      </BaseButton>
-    </div>
+    <section class="tags">
 
-    <div class="flex-row flex-between">
-      <div  style="width: 33%">
-        <input
-          id="tag"
-          v-model="newTag"
-          type="text"
-          class=""
-          required
-          placeholder="Ajouter une catégorie"
-          name="Ajouter une catégorie"
-          minlength="1"
-          maxlength="200"
-        />
-        <BaseButton
-          html-type="button"
-          visual-type="primary"
-          :disabled="state.maxTagsLengthReached"
-          icon="plus"
-          @buttonClicked="addTag(newTag, true)"
-        >Ajouter</BaseButton
-        >
-      </div>
-      <div >
-        <BaseParagraph visual-type="light">Propositions de catégories :</BaseParagraph>
-        <div class="flex-row flex-left">
+      <div class="flex-column flex-left">
+
+        <div class="flex-row flex-left selected-tags" style="width: 100%">
+          <BaseParagraph visual-type="light">Catégories de votre article : </BaseParagraph>
+          <BaseTag v-for="(tag, index) in articleTags" :key="tag.title" :tag="tag" v-on:tagClick="removeTag($event)" />
+        </div>
+
+        <div class="flex-row flex-between manual-input-container">
+          <input
+            id="tag"
+            v-model="newTag"
+            type="text"
+            class="add-tag-manually"
+            required
+            placeholder="Nouvelle catégorie"
+            name="Nouvelle catégorie"
+            minlength="1"
+            maxlength="200"
+          />
           <BaseButton
-            v-for="(tag, index) of tagsPresetLeft" :key="index"
+            html-type="button"
             visual-type="primary"
             :disabled="state.maxTagsLengthReached"
-            :outline="true"
-            icon="plus"
-            @buttonClicked="addTag(tag)"
+            icon="fas fa-plus"
+            v-on:buttonClicked="addManualTag(newTag)"
+          >Ajouter</BaseButton
           >
-            {{tag}}
-          </BaseButton>
+        </div>
+        <div >
+          <BaseParagraph visual-type="light">Propositions de catégories :</BaseParagraph>
+          <div class="flex-row flex-left">
+            <BaseTag v-for="(tag, index) in tagsPresetLeft" :key="index" :tag="tag" v-on:tagClick="addTag($event)"/>
+          </div>
         </div>
       </div>
-    </div>
-
+    </section>
 
     <div class="button-container">
       <BaseButton
         html-type="button"
         visual-type="success"
         :loading="state.postLoading"
-        icon="check"
+        icon="fas fa-check"
         @buttonClicked="post(false)"
       >Poster</BaseButton
       >
@@ -110,7 +96,7 @@
         html-type="button"
         visual-type="primary"
         :loading="state.postLoading"
-        icon="save"
+        icon="fas fa-save"
         @buttonClicked="post(true)"
       >Sauvegarder le brouillon</BaseButton
       >
@@ -130,6 +116,8 @@ import ArticlePost from '~/entities/Api/Article/ArticlePost'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import tagsQuery from '~/apollo/queries/Tags/tags.gql'
+import BaseTagModele from '~/components/Atoms/Tag/BaseTagModele'
+import BaseTag from '~/components/Atoms/Tag/BaseTag.vue'
 
 export default defineComponent({
   name: 'PostArticlePage',
@@ -137,14 +125,20 @@ export default defineComponent({
     BaseHeader,
     BaseButton,
     BaseParagraph,
+    BaseTag
   },
   middleware: 'authenticated',
+  data() {
+    return {
+      articleTags: []
+    }
+  },
   setup({ maxWidth }) {
     const context = useContext()
     const articleAuthor: User = context.store.state.user.authUser
-    const articleTags: Array<string> = []
-    const tagsPreset = ref<Array<string>>([])
-    const tagsPresetLeft = ref<Array<string>>([])
+    const articleTags: Array<BaseTagModele> = []
+    const tagsPreset = ref<Array<BaseTagModele>>([])
+    const tagsPresetLeft = ref<Array<BaseTagModele>>([])
     const articleContent: string = ''
     const newTag: string = ''
     const articleTitle: string = ''
@@ -163,8 +157,6 @@ export default defineComponent({
       true
     )
 
-    const postLoading: boolean = false
-
     const cssVars = ref({ '--max-width': maxWidth })
 
     useFetch(async () => {
@@ -175,8 +167,11 @@ export default defineComponent({
         })
         .then((tagsFromGQL: any) => {
           tagsFromGQL.data.tags.forEach((tagFromGql: any) => {
-            tagsPreset.value.push(tagFromGql.name)
-            tagsPresetLeft.value.push(tagFromGql.name)
+
+            const tag: BaseTagModele = new BaseTagModele(tagFromGql.name, true)
+
+            tagsPreset.value.push(tag)
+            tagsPresetLeft.value.push(tag)
           })
         })
         .catch((e: any) => console.log(e))
@@ -196,33 +191,41 @@ export default defineComponent({
     }
   },
   methods: {
-    addTag(tagName: string, manual: boolean = false){
+    addManualTag(tagName: string){
       if(tagName.length < 3){
         return
       }
+      const tag: BaseTagModele = new BaseTagModele(tagName, false, true)
 
-      if(this.articleTags.length >= 5 || this.state.maxTagsLengthReached){
+      this.addTag(tag)
+
+    },
+    addTag(tag: BaseTagModele){
+      if(this.articleTags.length >= 10 || this.state.maxTagsLengthReached){
         this.state.maxTagsLengthReached = true
         return
       }
 
-      this.articleTags.push(tagName.toLowerCase().replace(' ', '-'))
+      tag.canAdd = false
+      tag.canRemove = true
 
-      if(manual === false || this.tagsPresetLeft.includes(tagName.toLowerCase().replace(' ', '-')) === true){
-        this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
-      }else{
-        this.newTag = ''
+      this.articleTags.push(tag)
+
+      if(this.tagsPresetLeft.map(tagPresetLeft => tagPresetLeft.title).includes(tag.title) === true){
+        this.tagsPresetLeft.splice(this.tagsPresetLeft.indexOf(tag), 1)
       }
-
-      this.state.maxTagsLengthReached = this.articleTags.length >= 5
-
+      this.state.maxTagsLengthReached = this.articleTags.length >= 10
     },
-    removeTag(tagName: string){
-      this.articleTags.splice(this.articleTags.indexOf(tagName.toLowerCase().replace(' ', '-')), 1)
+    removeTag(tag: BaseTagModele){
+      this.articleTags.splice(this.articleTags.indexOf(tag), 1)
+      tag.canRemove = false
+      tag.canAdd = true
 
-      if(this.tagsPreset.includes(tagName) === true && this.tagsPresetLeft.includes(tagName.toLowerCase().replace(' ', '-')) === false){
-        this.tagsPresetLeft.push(tagName)
+      if(this.tagsPreset.includes(tag) === true && this.tagsPresetLeft.includes(tag) === false){
+        this.tagsPresetLeft.push(tag)
       }
+
+      this.state.maxTagsLengthReached = false
     },
     async post(isDraft: boolean) {
       this.state.postLoading = true
@@ -260,33 +263,33 @@ export default defineComponent({
         .doc(encodeURI(article.title)+encodeURI(user.displayName))
 
       await uniqueArticleRef.set({articleUid: article.uid, authorUid: article.authorUid})
-      .then(() => {
-        articleRef.set(article.toJSON())
         .then(() => {
-          articleRef.collection('versions').doc(articleVersion.uid).set(articleVersion.toJSON())
-          .then(() => {
-            this.$router.push({
-                path: '/profile',
-                query: { success: 'true' },
+          articleRef.set(article.toJSON())
+            .then(() => {
+              articleRef.collection('versions').doc(articleVersion.uid).set(articleVersion.toJSON())
+                .then(() => {
+                  this.$router.push({
+                    path: '/profile',
+                    query: { success: 'true' },
+                  })
+                }).catch(() => {
+                this.state.postLoading = false
+                this.state.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
               })
-          }).catch(() => {
-             this.state.postLoading = false
-             this.state.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
+            }).catch(() => {
+            this.state.postLoading = false
+            this.state.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
           })
         }).catch(() => {
           this.state.postLoading = false
-          this.state.error = 'Une erreur est survenue, veuillez réessayer plus tard.'
+          this.state.error = 'Vous avez déjà posté un article avec le même nom.'
         })
-      }).catch(() => {
-         this.state.postLoading = false
-         this.state.error = 'Vous avez déjà posté un article avec le même nom.'
-      })
     },
   },
 })
 </script>
 
-<style>
+<style scoped>
 textarea {
   min-height: 40vh;
   width: 100%;
@@ -446,5 +449,35 @@ div.selected-tags{
 div.button-container{
   margin: 24px 0;
 }
+
+section.tags > div.flex-column > div{
+  margin: 12px 0;
+}
+
+div.flex-row.flex-left.selected-tags{
+  align-items: center;
+}
+
+div.manual-input-container{
+  width: 50%;
+}
+
+
+input#tag.add-tag-manually {
+  padding: 12px;
+  width: 70%
+}
+
+@media only screen and (max-width: 1024px) {
+  div.manual-input-container{
+    width: 100%;
+  }
+
+  input#tag.add-tag-manually {
+    width: 100%
+  }
+
+}
+
 
 </style>

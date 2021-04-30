@@ -9,67 +9,9 @@
       </div>
 
       <ul>
-        <li class="flex-column">
-          <div class="flex-row input-row">
-            <label for="email">
-              Email<span class="required-field">*</span>
-            </label>
-
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              name="email"
-            />
-          </div>
-        </li>
-        <li class="flex-column">
-          <div class="flex-row input-row">
-            <label for="displayName">
-              Pseudo<span class="required-field">*</span>
-            </label>
-
-            <input
-              id="displayName"
-              v-model="displayName"
-              type="text"
-              required
-              name="displayName"
-            />
-          </div>
-        </li>
-        <li class="flex-column">
-          <div class="flex-row input-row">
-            <label for="password">
-              Mot de passe<span class="required-field">*</span>
-            </label>
-
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              name="password"
-            />
-          </div>
-        </li>
-        <li class="flex-column">
-          <div class="flex-row input-row">
-            <label for="repeatPassword">
-              Répéter le mot de passe<span class="required-field">*</span>
-            </label>
-
-            <input
-              id="repeatPassword"
-              v-model="repeatPassword"
-              type="password"
-              required
-              name="repeatPassword"
-            />
-          </div>
-        </li>
+        <BaseInput v-for="(input,index) in inputs" :key="index" :input="input"/>
       </ul>
+
       <div class="flex-column">
         <BaseButton
           html-type="submit"
@@ -97,6 +39,8 @@ import ProfileGql from '~/entities/Api/User/ProfileGql'
 import Profile from '~/entities/Front/User/Display/Profile'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import ArticleCardInfoProfilePage from '~/entities/Front/Article/Display/ArticleCardInfoProfilePage'
+import BaseInputModele from '~/components/Atoms/Input/BaseInputModele'
+import BaseInput from '~/components/Atoms/Input/BaseInput.vue'
 
 export default defineComponent({
   name: 'SigninPage',
@@ -104,22 +48,27 @@ export default defineComponent({
     BaseHeader,
     BaseButton,
     BaseParagraph,
-    BaseLink
+    BaseLink,
+    BaseInput
   },
   setup() {
-    const email: string = ''
-    const displayName: string = ''
-    const password: string = ''
-    const repeatPassword: string = ''
     const alert: BaseAlertModele = new BaseAlertModele('', '')
     const signinLoading: boolean = false
     const linkToLogin: BaseLinkModele = new BaseLinkModele(['login'], 'Vous avez déjà un compte ? Connectez-vous', true)
 
+    const emailInput: BaseInputModele = new BaseInputModele('email', 'email', 'email', 'Email', true)
+    const displayNameInput: BaseInputModele = new BaseInputModele('text', 'displayName', 'displayName', 'Pseudo', true)
+    const passwordInput: BaseInputModele = new BaseInputModele('password', 'password', 'password', 'Mot de passe', true)
+    const repeatPasswordInput: BaseInputModele = new BaseInputModele('password', 'repeatPassword', 'repeatPassword', 'Confirmer le mot de passe', true)
+    const inputs = {
+      'email': emailInput,
+      'displayName': displayNameInput,
+      'password': passwordInput,
+      'repeatPassword': repeatPasswordInput
+    }
+
     return {
-      email,
-      displayName,
-      password,
-      repeatPassword,
+      inputs,
       alert,
       signinLoading,
       linkToLogin
@@ -135,7 +84,7 @@ export default defineComponent({
           query: profileQuery,
           prefetch: true,
           variables: {
-            displayName: this.displayName,
+            displayName: this.inputs['displayName'].value,
           },
         })
         .then(() => {
@@ -150,14 +99,14 @@ export default defineComponent({
       }
 
       await this.$fire.auth.createUserWithEmailAndPassword(
-        this.email,
-        this.password
+        this.inputs['email'].value,
+        this.inputs['password'].value
       ).then(result => {
-        result.user?.updateProfile({displayName: this.displayName})
+        result.user?.updateProfile({displayName: this.inputs['displayName'].value})
         const user: User = new User({
           uid: result.user?.uid,
-          displayName: this.displayName,
-          email: this.email,
+          displayName: this.inputs['displayName'].value,
+          email: this.inputs['email'].value,
           active: true
         })
         this.$fire.firestore.collection('users').doc(result.user?.uid).set(user.toJSON())
@@ -192,37 +141,8 @@ form div.flex-column p {
   text-align: center;
 }
 
-form > ul > li > div {
-  padding: 0.5em;
-  align-items: normal;
-}
-
-form > ul > li > div > label {
-  flex: 1;
-  padding: 0.5em 1em 0.5em 0;
-}
-
-form > ul > li > div > input,
-form > ul > li > div > select {
-  flex: 2;
-}
-
-form > ul > li > div > label span.required-field {
-  margin-left: 6px;
-  color: var(--danger_text);
-}
-
-form ul li div.input-row {
-  width: 98%;
-}
-
 form div.flex-column a{
   padding: 12px 0;
 }
 
-@media screen and (max-width: 760px) {
-  form ul li .flex-row {
-    flex-direction: column;
-  }
-}
 </style>

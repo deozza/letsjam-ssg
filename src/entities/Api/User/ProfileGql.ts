@@ -5,6 +5,7 @@ export default class ProfileGql {
   email: string
   articles: Array<ArticleGql>
   likedArticles: Array<ArticleGql>
+  tags: Array<string>
 
   constructor(profileFromGraphql: object) {
     // @ts-ignore
@@ -12,6 +13,9 @@ export default class ProfileGql {
 
     // @ts-ignore
     this.email = 'displayName' in profileFromGraphql ? profileFromGraphql.email : ''
+
+    // @ts-ignore
+    this.tags = 'tags' in profileFromGraphql ? profileFromGraphql.tags : []
 
     this.articles = []
     this.likedArticles = []

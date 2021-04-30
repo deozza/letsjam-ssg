@@ -1,0 +1,5 @@
+query profileQuery($displayName: String!){
+  profile(displayName: $displayName){
+    tags,
+  }
+}

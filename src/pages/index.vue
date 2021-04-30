@@ -14,26 +14,47 @@
             minlength="3"
             maxlength="200"
           />
-          <BaseButton html-type="submit" visual-type="primary"  :loading="searchLoading" icon="search" :only-icon="true"></BaseButton>
+          <BaseButton html-type="submit" visual-type="primary" :loading="searchLoading" icon="fas fa-search" :only-icon="true"></BaseButton>
         </div>
       </form>
     </section>
-    <BaseHeader html-type="h2">Les derniers articles</BaseHeader>
-    <div v-if="$fetchState.pending">
-      <BaseCardLoading></BaseCardLoading>
-      <BaseCardLoading></BaseCardLoading>
-      <BaseCardLoading></BaseCardLoading>
-      <BaseCardLoading></BaseCardLoading>
+    <section>
+      <div class="flex-row flex-between">
+        <BaseHeader html-type="h2">Les derniers articles</BaseHeader>
+        <div class="flex-row flew-between articles-feed-mode" v-if="isLoggedIn">
+          <span
+            :class="[
+              { 'selected': state.articleFeedMode === 'hot' },
+            ]"
+            v-on:click="changeFeedMode('hot')"
+          >
+            Hot
+          </span>
+          <span
+            :class="[
+              { 'selected': state.articleFeedMode === 'feed' },
+            ]"
+            v-on:click="changeFeedMode('feed')"
+          >
+            Feed
+          </span>
+        </div>
+      </div>
+      <div v-if="$fetchState.pending">
+        <BaseCardLoading></BaseCardLoading>
+        <BaseCardLoading></BaseCardLoading>
+        <BaseCardLoading></BaseCardLoading>
+        <BaseCardLoading></BaseCardLoading>
 
-    </div>
-    <div v-else>
-
-      <BaseCard
-        v-for="(article, index) in articles"
-        :key="index"
-        :article="article"
-      />
-    </div>
+      </div>
+      <div v-else>
+        <BaseCard
+          v-for="(article, index) in articles"
+          :key="index"
+          :article="article"
+        />
+      </div>
+    </section>
   </section>
 </template>
 
@@ -52,6 +73,9 @@ import BaseCardLoading from '~/components/Molecules/Card/BaseCardLoading.vue'
 import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import { ArticleVersionState } from '~/entities/Api/Article/ArticleVersion'
 import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
+import Profile from '~/entities/Front/User/Display/Profile'
+import profileEditQuery from '~/apollo/queries/User/profileEdit.gql'
+import ProfileGql from '~/entities/Api/User/ProfileGql'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -64,8 +88,14 @@ export default defineComponent({
   setup() {
     const context = useContext()
     const articles  = ref<ArticleCardInfo[]>([])
+    const profile = ref<Profile>({} as Profile)
+    const isLoggedIn: boolean = context.store.state.user.authUser.displayName.length > 0
     const searchLoading: boolean = false
     const tagsInput: string = ''
+
+    const state = {
+      articleFeedMode: 'hot'
+    }
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -83,12 +113,32 @@ export default defineComponent({
           })
         })
         .catch((e: any) => console.log(e))
+
+      if(isLoggedIn){
+        await context.app.apolloProvider.defaultClient
+          .query({
+            query: profileEditQuery,
+            prefetch: true,
+            variables: {
+              displayName: decodeURI(context.store.state.user.authUser.displayName),
+            },
+          })
+          .then((profileFromGQL: any) => {
+            const profileGql: ProfileGql = new ProfileGql(profileFromGQL.data.profile)
+            profile.value = new Profile(profileGql)
+            profile.value.tags.forEach(tag => tag.canRemove = true)
+          })
+          .catch((e: any) => console.log(e))
+      }
     })
 
     return {
       articles,
       tagsInput,
-      searchLoading
+      searchLoading,
+      isLoggedIn,
+      profile,
+      state
     }
   },
   methods: {
@@ -103,12 +153,43 @@ export default defineComponent({
       })
 
       await this.$router.push('/search/'+searchQuery.slice(0,-1))
+    },
+    async changeFeedMode(mode: string){
+      this.state.articleFeedMode = mode
+      let variables = {}
+
+      if(mode === 'feed'){
+
+        variables = {
+          tags: this.profile.tags.map(tag => tag.title)
+        }
+      }
+
+      this.articles = []
+
+      await this.$store.app.apolloProvider.defaultClient
+        .query({
+          query: articlesQuery,
+          variables: variables,
+          prefetch: true,
+        })
+        .then((articlesFromGQL: any) => {
+          const publicArticles: Array<ArticleGql> = articlesFromGQL.data.articles
+
+          publicArticles.forEach((publicArticle: ArticleGql) => {
+            if(publicArticle.currentVersion.state === ArticleVersionState.PUBLISHED){
+              const articleCardInfo: ArticleCardInfo = new ArticleCardInfo(publicArticle)
+              this.articles.push(articleCardInfo)
+            }
+          })
+        })
+        .catch((e: any) => console.log(e))
     }
   }
 })
 </script>
 
-<style>
+<style scoped>
 section.search {
   background-color: white;
   margin: 12px 0 48px 0;
@@ -128,5 +209,24 @@ input#tag {
 
 input#tag.input-text-title {
   font-size: 1em;
+}
+
+div.articles-feed-mode > span{
+  margin-left: 12px
+}
+
+div.articles-feed-mode > span:hover {
+  cursor: pointer;
+}
+
+div.articles-feed-mode > span.selected{
+  font-weight: bold;
+  border-bottom: 3px solid  var(--primary_bg);
+}
+
+@media only screen and (max-width: 1024px) {
+  input#tag {
+    width: 60%
+  }
 }
 </style>

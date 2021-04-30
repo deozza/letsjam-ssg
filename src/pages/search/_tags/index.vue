@@ -1,6 +1,6 @@
 <template>
   <section>
-    <BaseHeader html-type="h2">Rechercher des articles sur <span class="tag" v-for="(tag, index) in tags" :key="index">{{tag}}</span> </BaseHeader>
+    <BaseHeader html-type="h2">Rechercher des articles sur <BaseTag v-for="(tag, index) in tags" :key="index" :tag="tag" /></BaseHeader>
     <div v-if="$fetchState.pending">
       <BaseCardLoading></BaseCardLoading>
       <BaseCardLoading></BaseCardLoading>
@@ -15,7 +15,7 @@
             <input
               id="tag"
               v-model="tagsInput"
-              type="text"
+              type="textarea"
               class="input-text-title"
               required
               placeholder="Rechercher un article (séparez les catégories par une virgule)"
@@ -23,7 +23,7 @@
               minlength="3"
               maxlength="200"
             />
-            <BaseButton html-type="submit" visual-type="primary" :loading="searchLoading" icon="search" :only-icon="true"></BaseButton>
+            <BaseButton html-type="submit" visual-type="primary" :loading="searchLoading" icon="fas fa-search" :only-icon="true"></BaseButton>
           </div>
         </form>
       </section>
@@ -62,6 +62,8 @@ import BaseButton from '~/components/Atoms/Button/BaseButton.vue'
 import BaseParagraph from '~/components/Atoms/Typography/Paragraph/BaseParagraph.vue'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import BaseLinkModele from '~/components/Atoms/Link/BaseLinkModele'
+import BaseTag from '~/components/Atoms/Tag/BaseTag.vue'
+import BaseTagModele from '~/components/Atoms/Tag/BaseTagModele'
 
 export default defineComponent({
   name: 'SearchPage',
@@ -71,14 +73,15 @@ export default defineComponent({
     BaseCardLoading,
     BaseButton,
     BaseParagraph,
-    BaseLink
+    BaseLink,
+    BaseTag
   },
   setup() {
     const context = useContext()
     let queryTags: Array<string> = context.params.value.tags.split('&')
 
     const articles  = ref<ArticleCardInfo[]>([])
-    const tags: Array<string> = []
+    const tags: Array<BaseTagModele> = []
     let tagsInput: string = ''
     const searchLoading: boolean = false
 
@@ -86,9 +89,12 @@ export default defineComponent({
       queryTags = [queryTags]
     }
 
-    queryTags.forEach((tag) => {
-      tags.push(decodeURI(tag.replace(' ', '-')))
-      tagsInput += decodeURI(tag)+ ","
+    queryTags.forEach((queryTag) => {
+      const tagTitle = decodeURI(queryTag.replace(' ', '-'))
+      const tag: BaseTagModele = new BaseTagModele(tagTitle)
+
+      tags.push(tag)
+      tagsInput += decodeURI(tagTitle)+ ","
     })
 
     const postLink: BaseLinkModele = new BaseLinkModele(
@@ -104,7 +110,7 @@ export default defineComponent({
         .query({
           query: articlesQuery,
           variables: {
-            tags: tags
+            tags: tags.map(tag => tag.title)
           }
         })
         .then((articlesFromGQL: any) => {
@@ -134,11 +140,14 @@ export default defineComponent({
 
       this.tagsInput.split(',').forEach((tag, index) => {
         if(tag !== ''){
-          searchQuery += encodeURI(tag.toLowerCase().replace(' ', '-'))
+
+          const tagAsObject: BaseTagModele = new BaseTagModele(tag)
+
+          searchQuery += encodeURI(tagAsObject.title)
           searchQuery += '&'
 
-          if(!this.tags.includes(tag)){
-            this.tags.push(tag)
+          if(!this.tags.includes(tagAsObject)){
+            this.tags.push(tagAsObject)
           }
 
         }
@@ -151,7 +160,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 section.search {
   background-color: white;
   margin: 12px 0 48px 0;
@@ -173,17 +181,9 @@ input#tag.input-text-title {
   font-size: 1em;
 }
 
-span.tag{
-  background-color: var(--primary_bg);
-  border: none;
-  color: white;
-  padding: 5px 10px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  margin: 4px 2px;
-  border-radius: 16px;
-  font-size: 18px;
-  font-weight: normal;
+@media only screen and (max-width: 1024px) {
+  input#tag {
+    width: 60%
+  }
 }
 </style>
