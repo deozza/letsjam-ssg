@@ -476,7 +476,7 @@ export default defineComponent({
 })
 </script>
 
-<style>
+<style scoped>
 section section section {
   background-color: white;
   margin: 12px 0;

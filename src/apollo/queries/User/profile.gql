@@ -2,6 +2,7 @@ query profileQuery($displayName: String!){
   profile(displayName: $displayName){
     displayName,
     email,
+    tags,
     articles{
       title,
       totalLikes,

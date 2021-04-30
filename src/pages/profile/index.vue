@@ -5,6 +5,10 @@
       <section class="profile-info">
         <BaseHeader html-type="h3">{{profile.displayName}}</BaseHeader>
         <BaseParagraph visual-type="light">Email : {{profile.email}}</BaseParagraph>
+        <BaseParagraph visual-type="light">
+          Centres d'intérêts :
+          <BaseTag v-for="(tag, index) in profile.tags" :key="tag.title" :tag="tag" />
+        </BaseParagraph>
         <BaseButton visual-type="primary" @buttonClicked="redirectToEditProfile()">Editer</BaseButton>
       </section>
       <section class="articles-posted">
@@ -81,6 +85,7 @@ import ArticleGql from '~/entities/Api/Article/ArticleGql'
 import BaseLink from '~/components/Atoms/Link/BaseLink.vue'
 import User from '~/entities/Api/User/User'
 import LikedArticleProfilePage from '~/entities/Front/Article/Display/LikedArticleProfilePage'
+import BaseTag from '~/components/Atoms/Tag/BaseTag.vue'
 
 export default defineComponent({
   name: 'ProfilePage',
@@ -88,7 +93,8 @@ export default defineComponent({
     BaseHeader,
     BaseParagraph,
     BaseButton,
-    BaseLink
+    BaseLink,
+    BaseTag
   },
   middleware: 'authenticated',
   setup() {
@@ -98,8 +104,6 @@ export default defineComponent({
     const likedArticlesInfo = ref<LikedArticleProfilePage[]>([])
     const user: User = context.store.getters['user/loggedUser']
     const userDisplayName: string = user.displayName
-
-    console.log(userDisplayName)
 
     useFetch(async () => {
       await context.app.apolloProvider.defaultClient
@@ -161,6 +165,11 @@ div.flex-row section {
 div.flex-row section.profile-info {
   width: 20%;
 }
+
+div.flex-row section.profile-info p {
+  margin: 12px 0
+}
+
 
 div.flex-row section.profile-info button {
   margin-top: 24px;
